@@ -24,7 +24,7 @@ public class TestCommandQueue : ICommandQueue
             if (cmd != null && cmd.TenantId == tenantId &&
                 aggregateNames.Contains(cmd.StreamType))
             {
-                yield return cmd.DeepClone();
+                yield return cmd.JsonClone();
             }
 
             ConsumerPointers[consumerName]++;
@@ -33,7 +33,7 @@ public class TestCommandQueue : ICommandQueue
 
     public async Task SendCommand(IEsCommand command, CancellationToken cancellationToken = default)
     {
-        var commandToSend = command.DeepClone();
+        var commandToSend = command.JsonClone();
         commandToSend.CommandId = Guid.NewGuid();
         commandToSend.CommandName = command.GetType().Name;
         commandToSend.StreamType = GetStreamType(command.GetType());

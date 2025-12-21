@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace ES.Core;
 
@@ -29,9 +30,15 @@ public class AggregateRunner<TAggregate>(
 
         logger.LogDebug("Aggregate after handling {saga}", aggregate);
 
-        logger.LogInformation("Saving {number} new events", aggregate.UncommittedEvents.Count);
+        if (aggregate.UncommittedEvents.Any())
+        {
+            logger.LogInformation("Saving {number} new events for {name}: {events}", 
+                aggregate.UncommittedEvents.Count,
+                aggregate.StreamType,
+                string.Join(",", aggregate.UncommittedEvents.Select(x => x.GetType().Name)));
 
-        await eventStorage.SaveEventsAsync(aggregate);
+            await eventStorage.SaveEventsAsync(aggregate);
+        }
     }
 
     private IEsCommandHandler<TAggregate> FindHandler(string commandName)

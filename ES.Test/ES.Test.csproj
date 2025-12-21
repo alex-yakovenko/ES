@@ -11,6 +11,7 @@
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
     <PackageReference Include="MartinCostello.Logging.XUnit" Version="0.7.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="Reqnroll.xUnit" Version="3.3.0" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
@@ -22,6 +23,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ES.Core\ES.Core.csproj" />
+    <ProjectReference Include="..\ES.Declarations\ES.Declarations.csproj" />
+    <ProjectReference Include="..\Aggregates\ES.Inventory\ES.Inventory.csproj" />
+    <ProjectReference Include="..\Aggregates\ES.Orders\ES.Orders.csproj" />
+    <ProjectReference Include="..\Sagas\ES.PlaceOrder\ES.PlaceOrder.csproj" />
+    <ProjectReference Include="..\Sagas\ES.UpdateOrder\ES.UpdateOrder.csproj" />
   </ItemGroup>
 
   <ItemGroup>

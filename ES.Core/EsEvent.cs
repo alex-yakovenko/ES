@@ -8,10 +8,6 @@ public record EsEvent (string AggregateId, string StreamType) : IEsEvent
     public string TenantId { get; set; } = "!!!NO TENANT SPECIFIED!!!";
     public string EventType { get; set; } = "";
     public int? EventTypeVersion { get; set; }
+    public string StreamType { get; set; } = StreamType;
     public DateTime? CreatedAt { get; set; }
-
-    IEsEvent IEsEvent.DeepClone()
-    {
-        return this with { };
-    }
 }

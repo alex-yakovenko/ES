@@ -1,4 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 
 namespace ES.Core;
 
@@ -22,5 +25,4 @@ public static class SagaExtensions
             SagaId: parts.Length > 1 ? parts[1] : null
         );
     }
-
 }

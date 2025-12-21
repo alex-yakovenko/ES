@@ -1,13 +1,6 @@
 ﻿using ES.Core;
-using ES.Test.Aggregates.Inventory;
-using ES.Test.Aggregates.Inventory.Commands;
-using ES.Test.Aggregates.Orders;
-using ES.Test.Aggregates.Orders.Commands;
 using ES.Test.EventStorage;
-using ES.Test.Sagas.PaceOrder;
-using ES.Test.Sagas.PaceOrder.Commands;
-using ES.Test.Sagas.PaceOrder.EventCatchers;
-using ES.Test.Sagas.PaceOrder.Steps;
+using ES.Declarations;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;
 
@@ -58,7 +51,7 @@ public class UnitTest1(ITestOutputHelper outputHelper) : IntegrationTestBase
             ])
         {
             TenantId = Tenant,
-            StreamType = InventoryItem.Stream
+            StreamType = PlaceOrderSaga.Stream
         });
 
         await ProcessQueue(consumingTasks);

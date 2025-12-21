@@ -1,8 +1,5 @@
 using ES.Core;
-using ES.Test.Aggregates.Inventory;
-using ES.Test.Aggregates.Orders;
-using ES.Test.Sagas.PaceOrder;
-using ES.Test.Sagas.UpdateOrder;
+using ES.Declarations;
 using Microsoft.Extensions.DependencyInjection;
 using Reqnroll;
 using System;
@@ -57,7 +54,7 @@ namespace ES.Test.Scenarios
             var command = new PlaceOrderSaga.Commands.Start($"place-order-{orderId}", orderId, customer, DateOnly.Parse(date), [])
             {
                 TenantId = Tenant,
-                StreamType = InventoryItem.Stream
+                StreamType = PlaceOrderSaga.Stream
             };
 
             foreach (var row in dataTable.Rows)
@@ -78,7 +75,7 @@ namespace ES.Test.Scenarios
             var command = new UpdateOrderSaga.Commands.Start($"update-order-{orderId}", orderId, [])
             {
                 TenantId = Tenant,
-                StreamType = InventoryItem.Stream
+                StreamType = UpdateOrderSaga.Stream
             };
 
             foreach (var row in dataTable.Rows)
@@ -94,6 +91,7 @@ namespace ES.Test.Scenarios
         public async Task ThenProductAvailableQuantityBecomes(string sku, int expectedQuantity)
         {
             var product = await eventStorage.Load<InventoryItem>(sku);
+            List<IEsEvent> productEvents = [.. await eventStorage.LoadEventsAsync<InventoryItem>(sku)];
 
             Assert.Equal(expectedQuantity, product.AvailableQuantity);
         }
@@ -101,6 +99,7 @@ namespace ES.Test.Scenarios
         [Then("order {string} has status {string} with items as follows:")]
         public async Task ThenOrderHasStatus(string orderId, string expectedStatus, DataTable dataTable)
         {
+            IEsEvent[] events = [.. await eventStorage.LoadEventsAsync<Order>(orderId)];
             var order = await eventStorage.Load<Order>(orderId);
             Assert.Equal(dataTable.RowCount, order.Items.Count);
 

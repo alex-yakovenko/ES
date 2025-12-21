@@ -52,6 +52,8 @@ public class SagaRunner<TSaga>(
         saga = await eventStorage.Load<TSaga>(correlationInfo.SagaId);
 
         await RunNextStep(saga);
+
+        await eventStorage.SaveEventsAsync(saga);
     }
 
     public async Task ProcessCommand<TCommand>(TCommand command)
@@ -78,13 +80,20 @@ public class SagaRunner<TSaga>(
 
         logger.LogDebug("Saga after handling {saga}", saga);
 
-        logger.LogInformation("Saving {number} new events", saga.UncommittedEvents.Count);
+        if (saga.UncommittedEvents.Any())
+        {
+            logger.LogInformation("Saving {number} new events: {events}", saga.UncommittedEvents.Count,
+                string.Join(",", saga.UncommittedEvents.Select(x => x.GetType().Name)));
+
+            await eventStorage.SaveEventsAsync(saga);
+
+            saga = await eventStorage.Load<TSaga>(command.AggregateId);
+        }
+
+        await RunNextStep(saga);
 
         await eventStorage.SaveEventsAsync(saga);
 
-        saga = await eventStorage.Load<TSaga>(command.AggregateId);
-
-        await RunNextStep(saga);
     }
 
     private IEsCommandHandler<TSaga> FindCommandHandler(string commandName)
@@ -137,8 +146,12 @@ public class SagaRunner<TSaga>(
                 StreamType = saga.StreamType
             });
 
-            logger.LogDebug("Save {number} new events to event storage", saga.UncommittedEvents.Count);
-            await eventStorage.SaveEventsAsync(saga);
+            logger.LogInformation("Saving {number} new events for {name}: {events}",
+                saga.UncommittedEvents.Count,
+                saga.StreamType,
+                string.Join(",", saga.UncommittedEvents.Select(x => x.GetType().Name)));
+
+            break;
         }
     }
 }

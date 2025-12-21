@@ -26,7 +26,7 @@ public class TestEventStorage : IEsEventStorage
                 streamTypes.Contains(evt.StreamType) &&
                 (string.IsNullOrWhiteSpace(correlationIdPrefix) || evt.CorrelationId?.StartsWith(correlationIdPrefix) == true))
             {
-                yield return evt.DeepClone();
+                yield return evt.JsonClone();
             }
 
             ConsumerPointers[consumerName]++;
@@ -58,7 +58,7 @@ public class TestEventStorage : IEsEventStorage
             [.. _events
                 .Where(e => e.AggregateId == aggregateId && e.StreamType == streamType)
                 .OrderBy(e => e.Version)
-                .Select(e => e.DeepClone())]
+                .Select(e => e.JsonClone())]
             );
     }
 
@@ -90,7 +90,7 @@ public class TestEventStorage : IEsEventStorage
             ArgumentException.ThrowIfNullOrWhiteSpace(e.TenantId, nameof(e.TenantId));
             ArgumentException.ThrowIfNullOrWhiteSpace(e.StreamType, nameof(e.StreamType));
 
-            var eventToSave = e.DeepClone();
+            var eventToSave = e.JsonClone();
             eventToSave.EventId = Guid.NewGuid();
             eventToSave.Version = lastSavedVersion++;
             eventToSave.EventType = e.GetType().Name;
