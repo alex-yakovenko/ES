@@ -5,9 +5,9 @@ using ES.Test.Aggregates.Orders;
 namespace ES.Test.Sagas.UpdateOrder.EventCatchers;
 
 public class ItemsAdjustedEventCatcher()
-    : EsEventCatcher<UpdateOrderSaga, OrderEvents.ItemsAdjusted>(InventoryEvents.Stream)
+    : EsEventCatcher<UpdateOrderSaga, Order.Events.ItemsAdjusted>(InventoryEvents.Stream)
 {
-    public override Task<bool> HandleEvent(UpdateOrderSaga saga, OrderEvents.ItemsAdjusted @event)
+    public override Task<bool> HandleEvent(UpdateOrderSaga saga, Order.Events.ItemsAdjusted @event)
     {
 
         saga.PushNewEvent(new UpdateOrderSaga.Events.OrderUpdateStatus(saga.Id, true)

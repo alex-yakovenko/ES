@@ -11,7 +11,7 @@ public class SetOrderPlacedStep(ICommandQueue commandQueue) : SagaStep<PlaceOrde
 
     public override async Task Execute(PlaceOrderSaga saga)
     {
-        await commandQueue.SendCommand(new OrderCommands.SetOrderPlaced(saga.OrderId)
+        await commandQueue.SendCommand(new Order.Commands.SetOrderPlaced(saga.OrderId)
         {
             TenantId = saga.TenantId,
             CorrelationId = saga.GetCorrelationId()

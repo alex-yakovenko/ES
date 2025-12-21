@@ -4,14 +4,15 @@ namespace ES.Test.Aggregates.Orders;
 
 public class Order : AggregateRoot
 {
-    public override string StreamType => OrderEvents.Stream;
+    public const string Stream = "Orders";
+    public override string StreamType => Stream;
     public string CustomerId { get; private set; }
     public DateOnly Date { get; private set; }
     public List<OrderItem> Items { get; private set; } = [];
     public string Status { get; private set; } = "";
     public string? Note { get; private set; }
     
-    public void Apply(OrderEvents.OrderDrafted e)
+    public void Apply(Events.OrderDrafted e)
     {
         Id = e.AggregateId;
         CustomerId = e.CustomerId;
@@ -20,18 +21,18 @@ public class Order : AggregateRoot
         Status = OrderStatus.Draft;
     }
 
-    public void Apply(OrderEvents.OrderCanceled e)
+    public void Apply(Events.OrderCanceled e)
     {
         Status = OrderStatus.Cancelled;
         Note = e.Reason;
     }
 
-    public void Apply(OrderEvents.OrderPlaced e)
+    public void Apply(Events.OrderPlaced e)
     {
         Status = OrderStatus.Placed;
     }
 
-    public void Apply(OrderEvents.ItemsAdjusted e)
+    public void Apply(Events.ItemsAdjusted e)
     {
         foreach (var change in e.Changes)
         {
@@ -59,4 +60,57 @@ public class Order : AggregateRoot
 
     public record OrderItemChange(string ProductId, int AdjustQuantityBy);
 
+    public static class Events
+    {
+        public record OrderDrafted(
+            string AggregateId,
+            string CustomerId,
+            DateOnly Date,
+            List<OrderItem> Items
+        ) : EsEvent(AggregateId, Stream);
+
+        public record OrderCanceled(
+            string AggregateId,
+            string Reason
+        ) : EsEvent(AggregateId, Stream);
+
+        public record OrderPlaced(
+            string AggregateId
+        ) : EsEvent(AggregateId, Stream);
+
+        public record ItemsAdjusted(
+            string AggregateId,
+            Order.OrderItemChange[] Changes
+        ) : EsEvent(AggregateId, Stream);
+
+        public record ItemsAdjustingFialeded(
+            string AggregateId
+        ) : EsEvent(AggregateId, Stream); 
+    }
+
+    public static class Commands
+    {
+        public record DraftOrder(
+            string AggregateId,
+            string CustomerId,
+            DateOnly Date,
+            List<OrderItem> Items
+        ) : EsCommand<Order>(AggregateId);
+
+        public record SetOrderPlaced(
+            string AggregateId
+        ) : EsCommand<Order>(AggregateId);
+
+
+        public record CancelOrder(
+            string AggregateId,
+            string Reason
+        ) : EsCommand<Order>(AggregateId);
+
+        public record AdjustProducts(
+            string AggregateId,
+            Order.OrderItemChange[] Changes
+        ) : EsCommand<Order>(AggregateId);
+
+    }
 }

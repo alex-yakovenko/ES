@@ -11,7 +11,7 @@ namespace ES.Test.Sagas.UpdateOrder.Steps
                 .Select(x => new Order.OrderItemChange(x.ProductId, x.AdjustQuantityBy))
                 .ToArray();
 
-            await commandQueue.SendCommand(new OrderCommands.AdjustProducts(saga.OrderId, changes)
+            await commandQueue.SendCommand(new Order.Commands.AdjustProducts(saga.OrderId, changes)
             {
                 TenantId = saga.TenantId,
                 CorrelationId = saga.GetCorrelationId()

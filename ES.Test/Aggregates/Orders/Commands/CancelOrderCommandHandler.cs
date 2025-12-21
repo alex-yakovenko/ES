@@ -3,11 +3,11 @@
 namespace ES.Test.Aggregates.Orders.Commands;
 
 public class CancelOrderCommandHandler :
-    EsCommandHandler<OrderCommands.CancelOrder, Order>
+    EsCommandHandler<Order.Commands.CancelOrder, Order>
 {
-    public override Task Handle(OrderCommands.CancelOrder command, Order aggregate)
+    public override Task Handle(Order.Commands.CancelOrder command, Order aggregate)
     {
-        aggregate.PushNewEvent(new OrderEvents.OrderCanceled(
+        aggregate.PushNewEvent(new Order.Events.OrderCanceled(
             aggregate.Id,
             command.Reason
         )

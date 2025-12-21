@@ -22,7 +22,7 @@ public class CancelOrderStep(ICommandQueue commandQueue) : SagaStep<PlaceOrderSa
 
         var insufficientProducts = string.Join(", ", saga.ItemsToReserve.Where(x => x.ReservationFailed).Select(x => x.ProductId));
 
-        await commandQueue.SendCommand(new OrderCommands.CancelOrder(saga.OrderId, $"Not enough products to reserve: {insufficientProducts}.")
+        await commandQueue.SendCommand(new Order.Commands.CancelOrder(saga.OrderId, $"Not enough products to reserve: {insufficientProducts}.")
         {
             TenantId = saga.TenantId,
             CorrelationId = saga.GetCorrelationId()

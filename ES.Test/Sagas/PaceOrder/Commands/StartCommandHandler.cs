@@ -13,7 +13,7 @@ public class StartCommandHandler(ICommandQueue commandQueue)
             saga.Id = Guid.NewGuid().ToString("N");
         }
 
-        await commandQueue.SendCommand(new OrderCommands.DraftOrder(command.OrderId, command.CustomerId, command.Date, command.Items)
+        await commandQueue.SendCommand(new Order.Commands.DraftOrder(command.OrderId, command.CustomerId, command.Date, command.Items)
         {
             TenantId = command.TenantId,
             CorrelationId = saga.GetCorrelationId()

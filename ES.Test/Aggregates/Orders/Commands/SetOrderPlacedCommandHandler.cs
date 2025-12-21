@@ -3,11 +3,11 @@
 namespace ES.Test.Aggregates.Orders.Commands;
 
 public class SetOrderPlacedCommandHandler :
-    EsCommandHandler<OrderCommands.SetOrderPlaced, Order>
+    EsCommandHandler<Order.Commands.SetOrderPlaced, Order>
 {
-    public override Task Handle(OrderCommands.SetOrderPlaced command, Order aggregate)
+    public override Task Handle(Order.Commands.SetOrderPlaced command, Order aggregate)
     {
-        aggregate.PushNewEvent(new OrderEvents.OrderPlaced(
+        aggregate.PushNewEvent(new Order.Events.OrderPlaced(
             command.AggregateId
         )
         {

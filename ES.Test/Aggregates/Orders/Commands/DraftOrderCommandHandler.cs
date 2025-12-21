@@ -3,11 +3,11 @@
 namespace ES.Test.Aggregates.Orders.Commands;
 
 public class DraftOrderCommandHandler :
-    EsCommandHandler<OrderCommands.DraftOrder, Order>
+    EsCommandHandler<Order.Commands.DraftOrder, Order>
 {
-    public override Task Handle(OrderCommands.DraftOrder command, Order aggregate)
+    public override Task Handle(Order.Commands.DraftOrder command, Order aggregate)
     {
-        aggregate.PushNewEvent(new OrderEvents.OrderDrafted(
+        aggregate.PushNewEvent(new Order.Events.OrderDrafted(
             command.AggregateId,
             command.CustomerId,
             command.Date,

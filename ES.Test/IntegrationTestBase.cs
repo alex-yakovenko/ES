@@ -149,12 +149,12 @@ public class IntegrationTestBase
     {
         return [
             CreateCommandsProcessingTask<InventoryItem>(services, InventoryEvents.Stream, tenant),
-            CreateCommandsProcessingTask<Order>(services, OrderEvents.Stream, tenant),
+            CreateCommandsProcessingTask<Order>(services, Order.Stream, tenant),
 
-            CreateSagaEventProcessingTask<PlaceOrderSaga>(services, [InventoryEvents.Stream, OrderEvents.Stream], tenant),
+            CreateSagaEventProcessingTask<PlaceOrderSaga>(services, [InventoryEvents.Stream, Order.Stream], tenant),
             CreateSagaCommandProcessingTask<PlaceOrderSaga>(services, PlaceOrderSaga.Stream, tenant),
 
-            CreateSagaEventProcessingTask<UpdateOrderSaga>(services, [InventoryEvents.Stream, OrderEvents.Stream], tenant),
+            CreateSagaEventProcessingTask<UpdateOrderSaga>(services, [InventoryEvents.Stream, Order.Stream], tenant),
             CreateSagaCommandProcessingTask<UpdateOrderSaga>(services, UpdateOrderSaga.Stream, tenant)
         ];
     }

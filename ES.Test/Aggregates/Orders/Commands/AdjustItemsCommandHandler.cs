@@ -3,9 +3,9 @@
 namespace ES.Test.Aggregates.Orders.Commands;
 
 public class AdjustItemsCommandHandler :
-    EsCommandHandler<OrderCommands.AdjustProducts, Order>
+    EsCommandHandler<Order.Commands.AdjustProducts, Order>
 {
-    public override Task Handle(OrderCommands.AdjustProducts command, Order order)
+    public override Task Handle(Order.Commands.AdjustProducts command, Order order)
     {
         var items = order.Items;
 
@@ -30,7 +30,7 @@ public class AdjustItemsCommandHandler :
 
         if (items.Any(x => x.Quantity < 0))
         {
-            order.PushNewEvent(new OrderEvents.ItemsAdjustingFialeded(
+            order.PushNewEvent(new Order.Events.ItemsAdjustingFialeded(
                 order.Id
             )
             {
@@ -41,7 +41,7 @@ public class AdjustItemsCommandHandler :
         }
         else 
         {
-            order.PushNewEvent(new OrderEvents.ItemsAdjusted(
+            order.PushNewEvent(new Order.Events.ItemsAdjusted(
                 order.Id,
                 command.Changes
             )
