@@ -2,11 +2,11 @@
 
 namespace ES.Test.Aggregates.Inventory.Commands;
 
-public class CreateInventoryItemCommandHandler : EsCommandHandler<InventoryCommands.CreateInventoryItemCommand, InventoryItem>
+public class CreateInventoryItemCommandHandler : EsCommandHandler<InventoryItem.Commands.CreateInventoryItemCommand, InventoryItem>
 {
-    public override Task Handle(InventoryCommands.CreateInventoryItemCommand command, InventoryItem aggregate)
+    public override Task Handle(InventoryItem.Commands.CreateInventoryItemCommand command, InventoryItem aggregate)
     {
-        var @event = new InventoryEvents.InventoryItemCreated(
+        var @event = new InventoryItem.Events.InventoryItemCreated(
             command.AggregateId,
             command.Name,
             command.InitialQuantity

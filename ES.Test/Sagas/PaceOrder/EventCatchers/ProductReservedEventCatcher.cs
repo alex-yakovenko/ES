@@ -4,9 +4,9 @@ using ES.Test.Aggregates.Inventory;
 namespace ES.Test.Sagas.PaceOrder.EventCatchers;
 
 public class ProductReservedEventCatcher() 
-    : EsEventCatcher<PlaceOrderSaga, InventoryEvents.ProductReserved>(InventoryEvents.Stream)
+    : EsEventCatcher<PlaceOrderSaga, InventoryItem.Events.ProductReserved>(InventoryItem.Stream)
 {
-    public override Task<bool> HandleEvent(PlaceOrderSaga saga, InventoryEvents.ProductReserved @event)
+    public override Task<bool> HandleEvent(PlaceOrderSaga saga, InventoryItem.Events.ProductReserved @event)
     {
         saga.PushNewEvent(new PlaceOrderSaga.Events.ProductReserved(saga.Id, @event.AggregateId)
         {

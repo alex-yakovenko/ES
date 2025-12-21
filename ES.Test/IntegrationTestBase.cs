@@ -148,13 +148,13 @@ public class IntegrationTestBase
     protected static List<(string consumer, string kind, Func<Task<int>> func)> CreateConsumingTasks(IServiceProvider? services, string tenant)
     {
         return [
-            CreateCommandsProcessingTask<InventoryItem>(services, InventoryEvents.Stream, tenant),
+            CreateCommandsProcessingTask<InventoryItem>(services, InventoryItem.Stream, tenant),
             CreateCommandsProcessingTask<Order>(services, Order.Stream, tenant),
 
-            CreateSagaEventProcessingTask<PlaceOrderSaga>(services, [InventoryEvents.Stream, Order.Stream], tenant),
+            CreateSagaEventProcessingTask<PlaceOrderSaga>(services, [InventoryItem.Stream, Order.Stream], tenant),
             CreateSagaCommandProcessingTask<PlaceOrderSaga>(services, PlaceOrderSaga.Stream, tenant),
 
-            CreateSagaEventProcessingTask<UpdateOrderSaga>(services, [InventoryEvents.Stream, Order.Stream], tenant),
+            CreateSagaEventProcessingTask<UpdateOrderSaga>(services, [InventoryItem.Stream, Order.Stream], tenant),
             CreateSagaCommandProcessingTask<UpdateOrderSaga>(services, UpdateOrderSaga.Stream, tenant)
         ];
     }

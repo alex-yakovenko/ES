@@ -3,12 +3,12 @@
 namespace ES.Test.Aggregates.Inventory.Commands;
 
 public class CancelProductReservationCommandHandler :
-    EsCommandHandler<InventoryCommands.CancelProductReservationCommand, InventoryItem>
+    EsCommandHandler<InventoryItem.Commands.CancelProductReservationCommand, InventoryItem>
 {
-    public override Task Handle(InventoryCommands.CancelProductReservationCommand command, InventoryItem inventoryItem)
+    public override Task Handle(InventoryItem.Commands.CancelProductReservationCommand command, InventoryItem inventoryItem)
     {
 
-        inventoryItem.PushNewEvent(new InventoryEvents.ProductReservationCanceled(
+        inventoryItem.PushNewEvent(new InventoryItem.Events.ProductReservationCanceled(
             inventoryItem.Id,
             command.OrderId
         )

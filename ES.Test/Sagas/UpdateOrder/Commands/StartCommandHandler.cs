@@ -13,7 +13,7 @@ namespace ES.Test.Sagas.UpdateOrder.Commands
             foreach (var item in command.Changes)
                 if (item.AdjustQuantityBy > 0)
                 {
-                    await commandQueue.SendCommand(new InventoryCommands.ReserveProductCommand(item.ProductId, item.AdjustQuantityBy, command.OrderId)
+                    await commandQueue.SendCommand(new InventoryItem.Commands.ReserveProductCommand(item.ProductId, item.AdjustQuantityBy, command.OrderId)
                     {
                         TenantId = command.TenantId,
                         CorrelationId = saga.GetCorrelationId()
@@ -23,7 +23,7 @@ namespace ES.Test.Sagas.UpdateOrder.Commands
                 }
                 else
                 {
-                    await commandQueue.SendCommand(new InventoryCommands.ReleaseProductCommand(item.ProductId, -item.AdjustQuantityBy, command.OrderId)
+                    await commandQueue.SendCommand(new InventoryItem.Commands.ReleaseProductCommand(item.ProductId, -item.AdjustQuantityBy, command.OrderId)
                     {
                         TenantId = command.TenantId,
                         CorrelationId = saga.GetCorrelationId()

@@ -3,13 +3,13 @@
 namespace ES.Test.Aggregates.Inventory.Commands;
 
 public class ReserveProductCommandHandler :
-    EsCommandHandler<InventoryCommands.ReserveProductCommand, InventoryItem>
+    EsCommandHandler<InventoryItem.Commands.ReserveProductCommand, InventoryItem>
 {
-    public override Task Handle(InventoryCommands.ReserveProductCommand command, InventoryItem inventoryItem)
+    public override Task Handle(InventoryItem.Commands.ReserveProductCommand command, InventoryItem inventoryItem)
     {
         if (inventoryItem.AvailableQuantity - command.Quantity < 0)
         {
-            inventoryItem.PushNewEvent(new InventoryEvents.ProductReservationFailed(
+            inventoryItem.PushNewEvent(new InventoryItem.Events.ProductReservationFailed(
                 inventoryItem.Id,
                 command.Quantity,
                 command.OrderId
@@ -21,7 +21,7 @@ public class ReserveProductCommandHandler :
         }
         else
         {
-            inventoryItem.PushNewEvent(new InventoryEvents.ProductReserved(
+            inventoryItem.PushNewEvent(new InventoryItem.Events.ProductReserved(
                 inventoryItem.Id,
                 command.Quantity,
                 command.OrderId

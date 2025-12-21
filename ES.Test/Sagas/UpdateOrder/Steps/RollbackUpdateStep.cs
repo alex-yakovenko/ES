@@ -8,7 +8,7 @@ namespace ES.Test.Sagas.UpdateOrder.Steps
         public override async Task Execute(UpdateOrderSaga saga)
         {
             foreach (var item in saga.Changes.Where(x => x.WaitsForReservation && !x.FailedToReserve))
-                await commandQueue.SendCommand(new InventoryCommands.CancelProductReservationCommand(item.ProductId, saga.OrderId)
+                await commandQueue.SendCommand(new InventoryItem.Commands.CancelProductReservationCommand(item.ProductId, saga.OrderId)
                 {
                     TenantId = saga.TenantId,
                     CorrelationId = saga.GetCorrelationId()

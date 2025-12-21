@@ -4,9 +4,9 @@ using ES.Test.Aggregates.Inventory;
 namespace ES.Test.Sagas.PaceOrder.EventCatchers;
 
 public class ProductReservationFailedEventCatcher() : 
-    EsEventCatcher<PlaceOrderSaga, InventoryEvents.ProductReservationFailed>(InventoryEvents.Stream)
+    EsEventCatcher<PlaceOrderSaga, InventoryItem.Events.ProductReservationFailed>(InventoryItem.Stream)
 {
-    public override Task<bool> HandleEvent(PlaceOrderSaga saga, InventoryEvents.ProductReservationFailed @event)
+    public override Task<bool> HandleEvent(PlaceOrderSaga saga, InventoryItem.Events.ProductReservationFailed @event)
     {
         saga.PushNewEvent(new PlaceOrderSaga.Events.ProductReservationFailed(saga.Id, @event.AggregateId)
         {

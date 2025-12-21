@@ -31,18 +31,18 @@ public class UnitTest1(ITestOutputHelper outputHelper) : IntegrationTestBase
         var product1Id = Guid.NewGuid().ToString("N");
         var product2Id = Guid.NewGuid().ToString("N");
 
-        await commandSender.SendCommand(new InventoryCommands.CreateInventoryItemCommand(product1Id, "Product 1", 100)
+        await commandSender.SendCommand(new InventoryItem.Commands.CreateInventoryItemCommand(product1Id, "Product 1", 100)
         {
             TenantId = Tenant,
-            StreamType = InventoryEvents.Stream
+            StreamType = InventoryItem.Stream
         });
 
         await ProcessQueue(consumingTasks);
 
-        await commandSender.SendCommand(new InventoryCommands.CreateInventoryItemCommand(product2Id, "Product 2", 200)
+        await commandSender.SendCommand(new InventoryItem.Commands.CreateInventoryItemCommand(product2Id, "Product 2", 200)
         {
             TenantId = Tenant,
-            StreamType = InventoryEvents.Stream
+            StreamType = InventoryItem.Stream
         });
 
         await ProcessQueue(consumingTasks);
@@ -58,7 +58,7 @@ public class UnitTest1(ITestOutputHelper outputHelper) : IntegrationTestBase
             ])
         {
             TenantId = Tenant,
-            StreamType = InventoryEvents.Stream
+            StreamType = InventoryItem.Stream
         });
 
         await ProcessQueue(consumingTasks);

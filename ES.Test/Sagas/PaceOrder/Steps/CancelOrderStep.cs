@@ -13,7 +13,7 @@ public class CancelOrderStep(ICommandQueue commandQueue) : SagaStep<PlaceOrderSa
     {
         foreach (var item in saga.ItemsToReserve.Where(x => x.ProductReserved))
         {
-            await commandQueue.SendCommand(new InventoryCommands.CancelProductReservationCommand(item.ProductId, saga.OrderId)
+            await commandQueue.SendCommand(new InventoryItem.Commands.CancelProductReservationCommand(item.ProductId, saga.OrderId)
             {
                 TenantId = saga.TenantId,
                 CorrelationId = saga.GetCorrelationId()

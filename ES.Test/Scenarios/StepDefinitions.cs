@@ -41,10 +41,10 @@ namespace ES.Test.Scenarios
         [Given("product with SKU {string} and available quantity {int} is present in inventory")]
         public async Task GivenProductWithSKUAndAvailableQuantityIsPresentInInventory(string sku, int quantity)
         {
-            await commandSender.SendCommand(new InventoryCommands.CreateInventoryItemCommand(sku, sku, quantity)
+            await commandSender.SendCommand(new InventoryItem.Commands.CreateInventoryItemCommand(sku, sku, quantity)
             {
                 TenantId = Tenant,
-                StreamType = InventoryEvents.Stream
+                StreamType = InventoryItem.Stream
             });
 
             await ProcessQueue(consumingTasks);
@@ -57,7 +57,7 @@ namespace ES.Test.Scenarios
             var command = new PlaceOrderSaga.Commands.Start($"place-order-{orderId}", orderId, customer, DateOnly.Parse(date), [])
             {
                 TenantId = Tenant,
-                StreamType = InventoryEvents.Stream
+                StreamType = InventoryItem.Stream
             };
 
             foreach (var row in dataTable.Rows)
@@ -78,7 +78,7 @@ namespace ES.Test.Scenarios
             var command = new UpdateOrderSaga.Commands.Start($"update-order-{orderId}", orderId, [])
             {
                 TenantId = Tenant,
-                StreamType = InventoryEvents.Stream
+                StreamType = InventoryItem.Stream
             };
 
             foreach (var row in dataTable.Rows)

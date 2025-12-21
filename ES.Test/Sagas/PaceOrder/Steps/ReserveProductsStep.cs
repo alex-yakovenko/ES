@@ -14,7 +14,7 @@ public class ReserveProductsStep(ICommandQueue commandQueue) : SagaStep<PlaceOrd
     {
         foreach (var item in saga.ItemsToReserve.Where(x => !x.ReservationRequested))
         {
-            await commandQueue.SendCommand(new InventoryCommands.ReserveProductCommand(item.ProductId, item.Quantity, saga.OrderId)
+            await commandQueue.SendCommand(new InventoryItem.Commands.ReserveProductCommand(item.ProductId, item.Quantity, saga.OrderId)
             {
                 TenantId = saga.TenantId,
                 CorrelationId = saga.GetCorrelationId()
