@@ -105,7 +105,7 @@ namespace ES.Test.Scenarios
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Scenarios/UpdateOrder.feature.ndjson", 3);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Scenarios/UpdateOrder.feature.ndjson", 5);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -201,6 +201,130 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
 #line 21
  await testRunner.AndAsync("product \"BOOK-2\" available quantity becomes 20", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Add quantity of existing product in Order")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "UpdateOrder")]
+        [global::Xunit.TraitAttribute("Description", "Add quantity of existing product in Order")]
+        public async global::System.Threading.Tasks.Task AddQuantityOfExistingProductInOrder()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "1";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Add quantity of existing product in Order", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 23
+this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 24
+ await testRunner.GivenAsync("All flows are configured", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 25
+ await testRunner.AndAsync("product with SKU \"BOOK-1\" and available quantity 350 is present in inventory", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+                global::Reqnroll.Table table8 = new global::Reqnroll.Table(new string[] {
+                            "Product ID",
+                            "Quantity"});
+                table8.AddRow(new string[] {
+                            "BOOK-1",
+                            "150"});
+#line 26
+ await testRunner.AndAsync("having placed order for \"ABC ltd\", date \"11/12/2025\", ID \"O2025/1324\" and product" +
+                        "s as follows:", ((string)(null)), table8, "And ");
+#line hidden
+                global::Reqnroll.Table table9 = new global::Reqnroll.Table(new string[] {
+                            "Product ID",
+                            "Quantity"});
+                table9.AddRow(new string[] {
+                            "BOOK-1",
+                            "+120"});
+#line 29
+ await testRunner.WhenAsync("updating order \"O2025/1324\" product changes as follows:", ((string)(null)), table9, "When ");
+#line hidden
+                global::Reqnroll.Table table10 = new global::Reqnroll.Table(new string[] {
+                            "Product ID",
+                            "Quantity"});
+                table10.AddRow(new string[] {
+                            "BOOK-1",
+                            "270"});
+#line 32
+ await testRunner.ThenAsync("order \"O2025/1324\" has status \"Placed\" with items as follows:", ((string)(null)), table10, "Then ");
+#line hidden
+#line 35
+ await testRunner.AndAsync("product \"BOOK-1\" available quantity becomes 80", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Reduce quantity of existing product in Order")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "UpdateOrder")]
+        [global::Xunit.TraitAttribute("Description", "Reduce quantity of existing product in Order")]
+        public async global::System.Threading.Tasks.Task ReduceQuantityOfExistingProductInOrder()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "2";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Reduce quantity of existing product in Order", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 37
+this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 38
+ await testRunner.GivenAsync("All flows are configured", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 39
+ await testRunner.AndAsync("product with SKU \"BOOK-1\" and available quantity 350 is present in inventory", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+                global::Reqnroll.Table table11 = new global::Reqnroll.Table(new string[] {
+                            "Product ID",
+                            "Quantity"});
+                table11.AddRow(new string[] {
+                            "BOOK-1",
+                            "150"});
+#line 40
+ await testRunner.AndAsync("having placed order for \"ABC ltd\", date \"11/12/2025\", ID \"O2025/1324\" and product" +
+                        "s as follows:", ((string)(null)), table11, "And ");
+#line hidden
+                global::Reqnroll.Table table12 = new global::Reqnroll.Table(new string[] {
+                            "Product ID",
+                            "Quantity"});
+                table12.AddRow(new string[] {
+                            "BOOK-1",
+                            "-120"});
+#line 43
+ await testRunner.WhenAsync("updating order \"O2025/1324\" product changes as follows:", ((string)(null)), table12, "When ");
+#line hidden
+                global::Reqnroll.Table table13 = new global::Reqnroll.Table(new string[] {
+                            "Product ID",
+                            "Quantity"});
+                table13.AddRow(new string[] {
+                            "BOOK-1",
+                            "30"});
+#line 46
+ await testRunner.ThenAsync("order \"O2025/1324\" has status \"Placed\" with items as follows:", ((string)(null)), table13, "Then ");
+#line hidden
+#line 49
+ await testRunner.AndAsync("product \"BOOK-1\" available quantity becomes 320", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

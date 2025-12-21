@@ -22,36 +22,10 @@ public class IntegrationTestBase
     protected IServiceProvider? GetServiceProvider(ITestOutputHelper outputHelper, LogLevel debugMinLevel = LogLevel.Information)
     {
         return new ServiceCollection()
-            .AddScoped<IEsCommandHandler<InventoryItem>, CreateInventoryItemCommandHandler>()
-            .AddScoped<IEsCommandHandler<InventoryItem>, ReserveProductCommandHandler>()
-            .AddScoped<IEsCommandHandler<InventoryItem>, CancelProductReservationCommandHandler>()
-            .AddScoped<IAggregateFlow<InventoryItem>, AggregateFlow<InventoryItem>>()
-
-            .AddScoped<IEsCommandHandler<Order>, DraftOrderCommandHandler>()
-            .AddScoped<IEsCommandHandler<Order>, SetOrderPlacedCommandHandler>()
-            .AddScoped<IEsCommandHandler<Order>, AdjustItemsCommandHandler>()
-            .AddScoped<IEsCommandHandler<Order>, CancelOrderCommandHandler>()
-            .AddScoped<IAggregateFlow<Order>, AggregateFlow<Order>>()
-
-            .AddScoped<IEsCommandHandler<PlaceOrderSaga>, StartCommandHandler>()
-            .AddScoped<ISagaStep<PlaceOrderSaga>, SetOrderPlacedStep>()
-            .AddScoped<ISagaStep<PlaceOrderSaga>, CancelOrderStep>()
-            .AddScoped<ISagaStep<PlaceOrderSaga>, ReserveProductsStep>()
-            .AddScoped<IEsEventCatcher<PlaceOrderSaga>, Sagas.PaceOrder.EventCatchers.ProductReservedEventCatcher>()
-            .AddScoped<IEsEventCatcher<PlaceOrderSaga>, Sagas.PaceOrder.EventCatchers.ProductReservationFailedEventCatcher>()
-            .AddScoped<ISagaFlowRunner<PlaceOrderSaga>, SagaFlowRunner<PlaceOrderSaga>>()
-
-            .AddScoped<IEsCommandHandler<UpdateOrderSaga>, Sagas.UpdateOrder.Commands.StartCommandHandler> ()
-            .AddScoped<ISagaStep<UpdateOrderSaga>, CompleteStep>()
-            .AddScoped<ISagaStep<UpdateOrderSaga>, PerformUpdateStep>()
-            .AddScoped<ISagaStep<UpdateOrderSaga>, RollbackUpdateStep>()
-            .AddScoped<IEsEventCatcher<UpdateOrderSaga>, ItemsAdjustedEventCatcher>()
-            .AddScoped<IEsEventCatcher<UpdateOrderSaga>, ItemsAdjustingFialededEventCatcher>()
-            .AddScoped<IEsEventCatcher<UpdateOrderSaga>, Sagas.UpdateOrder.EventCatchers.ProductReservationFailedEventCatcher>()
-            .AddScoped<IEsEventCatcher<UpdateOrderSaga>, Sagas.UpdateOrder.EventCatchers.ProductReservedEventCatcher>()
-
-            .AddScoped<ISagaFlowRunner<UpdateOrderSaga>, SagaFlowRunner<UpdateOrderSaga>>()
-
+            .RegisterInventory()
+            .RegisterOrder()
+            .RegisterPlaceOrderSaga()
+            .RegisterUpdateOrderSaga()
 
             .AddSingleton<IEsEventStorage, TestEventStorage>()
             .AddSingleton<ICommandQueue, TestCommandQueue>()
@@ -79,7 +53,7 @@ public class IntegrationTestBase
             using var scope = services.CreateScope();
             var serviceProvider = scope.ServiceProvider;
 
-            var commandsFlow = serviceProvider.GetRequiredService<IAggregateFlow<TAggregate>>();
+            var commandsFlow = serviceProvider.GetRequiredService<IAggregateRunner<TAggregate>>();
 
             var commandQueue = serviceProvider.GetRequiredService<ICommandQueue>();
 
@@ -106,7 +80,7 @@ public class IntegrationTestBase
             using var scope = services.CreateScope();
             var serviceProvider = scope.ServiceProvider;
 
-            var commandsFlow = serviceProvider.GetRequiredService<ISagaFlowRunner<TSaga>>();
+            var commandsFlow = serviceProvider.GetRequiredService<ISagaRunner<TSaga>>();
             var commandQueue = serviceProvider.GetRequiredService<ICommandQueue>();
 
             await foreach (var cmd in commandQueue.ConsumeCommands(tenant, [streamName], consumerName: consumerName))
@@ -131,7 +105,7 @@ public class IntegrationTestBase
             using var scope = services.CreateScope();
             var serviceProvider = scope.ServiceProvider;
 
-            var commandsFlow = serviceProvider.GetRequiredService<ISagaFlowRunner<TSaga>>();
+            var commandsFlow = serviceProvider.GetRequiredService<ISagaRunner<TSaga>>();
 
             var eventsStorage = serviceProvider.GetRequiredService<IEsEventStorage>();
 

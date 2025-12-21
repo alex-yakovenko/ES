@@ -2,11 +2,11 @@
 
 namespace ES.Core;
 
-public class AggregateFlow<TAggregate>(
+public class AggregateRunner<TAggregate>(
         IEsEventStorage eventStorage,
         IEnumerable<IEsCommandHandler<TAggregate>> commandHandlers,
-        ILogger<AggregateFlow<TAggregate>> logger
-    ) : IAggregateFlow<TAggregate> 
+        ILogger<AggregateRunner<TAggregate>> logger
+    ) : IAggregateRunner<TAggregate> 
     where TAggregate : class, IAggregateRoot, new()
 {
     private Dictionary<string, IEsCommandHandler<TAggregate>>? _handlers;
