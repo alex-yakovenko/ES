@@ -8,17 +8,12 @@ namespace ES.Core;
 public static class SagaExtensions
 {
 
-    public static string GetCorrelationId(this ISaga saga)
+    public static (string? StreamType, string? SagaId) ParseCorrelationId(this IMessageContext context)
     {
-        return $"{saga.StreamType}:{saga.Id:N}";
-    }
-
-    public static (string? StreamType, string? SagaId) ParseCorrelationId(this IEsEvent esEvent)
-    {
-        if (string.IsNullOrWhiteSpace(esEvent.CorrelationId))
+        if (string.IsNullOrWhiteSpace(context.CorrelationId))
             return (StreamType: null, SagaId: null);
 
-        var parts = esEvent.CorrelationId.Split(':');
+        var parts = context.CorrelationId.Split(':');
 
         return (
             StreamType: parts[0],

@@ -1,14 +1,7 @@
 <Solution>
+  <Folder Name="/Sagas/" />
   <Project Path="ES.Core/ES.Core.csproj" />
+  <Project Path="ES.Declarations/ES.Declarations.csproj" />
   <Project Path="ES.Demo/ES.Demo.csproj" />
   <Project Path="ES.Test/ES.Test.csproj" />
-  <Project Path="ES.Declarations/ES.Declarations.csproj" />
-  <Folder Name="/Aggregates/">
-    <Project Path="Aggregates/ES.Inventory/ES.Inventory.csproj" />
-    <Project Path="Aggregates/ES.Orders/ES.Orders.csproj" />
-  </Folder>
-  <Folder Name="/Sagas/">
-    <Project Path="Sagas/ES.PlaceOrder/ES.PlaceOrder.csproj" />
-    <Project Path="Sagas/ES.UpdateOrder/ES.UpdateOrder.csproj" />
-  </Folder>
 </Solution>

@@ -1,10 +1,15 @@
 ﻿using ES.Core;
 using ES.Declarations;
-using ES.Inventory;
-using ES.Orders;
-using ES.PlaceOrder;
-using ES.UpdateOrder;
+using ES.Declarations.Inventory;
+using ES.Declarations.Orders;
+using ES.Declarations.PlaceOrderSaga;
+using ES.Declarations.UpdateOrderSaga;
+using ES.Test.Aggregates;
 using ES.Test.EventStorage;
+using ES.Test.Sagas;
+using Eventuous;
+using Eventuous.Subscriptions;
+using Eventuous.Subscriptions.Context;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
@@ -15,15 +20,17 @@ public class IntegrationTestBase
 {
     protected IServiceProvider? GetServiceProvider(ITestOutputHelper outputHelper, LogLevel debugMinLevel = LogLevel.Information)
     {
+        var eventStore = new TestEventStore();
         return new ServiceCollection()
-            .RegisterInventory()
-            .RegisterOrder()
-            .RegisterPlaceOrderSaga()
-            .RegisterUpdateOrderSaga()
+            .AddCommandService<InventoryService, InventoryState>()
+            .AddCommandService<OrderService, OrderState>()
+            .AddCommandService<PlaceOrderSagaService, PlaceOrderSagaState>()
+            .AddCommandService<UpdateOrderSagaService, UpdateOrderSagaState>()
 
-            .AddSingleton<IEsEventStorage, TestEventStorage>()
-            .AddSingleton<ICommandQueue, TestCommandQueue>()
-            .AddScoped<ISagaStepAllowedVerificationService, SagaStepAllowedVerificationService>()
+            .AddEventStore<TestEventStore>()
+
+            .AddScoped<IEventHandler, PlaceOrderSaga>()
+            .AddScoped<IEventHandler, UpdateOrderSaga>()
 
             .AddLogging(builder => {
                 builder.AddDebug();
@@ -34,110 +41,54 @@ public class IntegrationTestBase
             .BuildServiceProvider();
     }
 
-    protected static (string consumer, string kind, Func<Task<int>> func) CreateCommandsProcessingTask<TAggregate>(
-            IServiceProvider services, string streamName, string tenant)
-        where TAggregate : class, IAggregateRoot, new()
+    protected Func<Task> CreateHandlerRunner(IServiceProvider services, Dictionary<string, int> readPositions, string tenant)
     {
-        var consumerName = new TAggregate().GetType().Name;
+        var eventReader = services.GetRequiredService<IEventReader>();
 
-        return (consumerName, "agrt-cmds", async () =>
-        {
-            var counter = 0;
-
-            using var scope = services.CreateScope();
-            var serviceProvider = scope.ServiceProvider;
-
-            var commandsFlow = serviceProvider.GetRequiredService<IAggregateRunner<TAggregate>>();
-
-            var commandQueue = serviceProvider.GetRequiredService<ICommandQueue>();
-
-            await foreach (var cmd in commandQueue.ConsumeCommands(tenant, [streamName], consumerName: consumerName))
+        var handlers = services.GetServices<IEventHandler>()
+            .Select(x => (Func<Task<int>>)(async () =>
             {
-                await commandsFlow.ProcessCommand(cmd as IEsCommand<TAggregate>);
-                counter++;
-            }
+                var handlerName = x.GetType().Name;
+                if (!readPositions.ContainsKey(handlerName))
+                    readPositions[handlerName] = 0;
 
-            return counter;
-        });
-    }
+                int totalEventsRead = 0;
 
-    protected static (string consumer, string kind, Func<Task<int>> func) CreateSagaCommandProcessingTask<TSaga>(
-            IServiceProvider services, string streamName, string tenant)
-        where TSaga : class, ISaga, new()
-    {
-        var consumerName = new TSaga().GetType().Name;
+                var start = readPositions[handlerName];
+                StreamEvent[] events;
+                do
+                {
+                    events = await eventReader.ReadEvents(new StreamName("-"),
+                        new StreamReadPosition(start), 10, CancellationToken.None);
+                    totalEventsRead += events.Length;
 
-        return (consumerName, "saga-cmds", async () =>
+                    foreach (var evt in events)
+                    {
+                        var ctx = new MessageConsumeContext("", "", "", "-", 0,
+                            0, 0, 0, default, evt.Payload, evt.Metadata, "", CancellationToken.None);
+                        var result = await x.HandleEvent(ctx);
+                        start++;
+                    }
+                } while (events.Length > 0);
+
+                readPositions[handlerName] = start;
+
+                return totalEventsRead;
+            }))
+            .ToArray();
+
+        return async () =>
         {
-            var counter = 0;
-
-            using var scope = services.CreateScope();
-            var serviceProvider = scope.ServiceProvider;
-
-            var commandsFlow = serviceProvider.GetRequiredService<ISagaRunner<TSaga>>();
-            var commandQueue = serviceProvider.GetRequiredService<ICommandQueue>();
-
-            await foreach (var cmd in commandQueue.ConsumeCommands(tenant, [streamName], consumerName: consumerName))
+            int totalEventsRead = 0;
+            do
             {
-                await commandsFlow.ProcessCommand(cmd as IEsCommand<TSaga>);
-                counter++;
-            }
-
-            return counter;
-        });
+                totalEventsRead = 0;
+                foreach (var handler in handlers)
+                {
+                    totalEventsRead += await handler();
+                }
+            } while (totalEventsRead > 0);
+        };
     }
 
-    protected static (string consumer, string kind, Func<Task<int>> func) CreateSagaEventProcessingTask<TSaga>(
-            IServiceProvider services, string[] streamNames, string tenant)
-        where TSaga : class, ISaga, new()
-    {
-        var consumerName = new TSaga().GetType().Name;
-        return (consumerName, "saga-evt", async () =>
-        {
-            var counter = 0;
-
-            using var scope = services.CreateScope();
-            var serviceProvider = scope.ServiceProvider;
-
-            var commandsFlow = serviceProvider.GetRequiredService<ISagaRunner<TSaga>>();
-
-            var eventsStorage = serviceProvider.GetRequiredService<IEsEventStorage>();
-
-            await foreach (var evt in eventsStorage.ConsumeEvents(tenant, streamNames, consumerName: consumerName))
-            {
-                await commandsFlow.ProcessEvent(evt);
-                counter++;
-            }
-
-            return counter;
-        });
-    }
-
-    protected static List<(string consumer, string kind, Func<Task<int>> func)> CreateConsumingTasks(IServiceProvider? services, string tenant)
-    {
-        return [
-            CreateCommandsProcessingTask<InventoryItem>(services, InventoryItem.Stream, tenant),
-            CreateCommandsProcessingTask<Order>(services, Order.Stream, tenant),
-
-            CreateSagaEventProcessingTask<PlaceOrderSaga>(services, [InventoryItem.Stream, Order.Stream], tenant),
-            CreateSagaCommandProcessingTask<PlaceOrderSaga>(services, PlaceOrderSaga.Stream, tenant),
-
-            CreateSagaEventProcessingTask<UpdateOrderSaga>(services, [InventoryItem.Stream, Order.Stream], tenant),
-            CreateSagaCommandProcessingTask<UpdateOrderSaga>(services, UpdateOrderSaga.Stream, tenant)
-        ];
-    }
-
-    protected async Task ProcessQueue(List<(string consumer, string kind, Func<Task<int>> func)> consumingTasks)
-    {
-        int processedMessages;
-
-        do
-        {
-            processedMessages = 0;
-
-            foreach (var task in consumingTasks)
-                processedMessages += await task.func();
-
-        } while (processedMessages > 0);
-    }
 }

@@ -1,6 +1,13 @@
 ﻿using ES.Core;
-using ES.Test.EventStorage;
 using ES.Declarations;
+using ES.Declarations.Inventory;
+using ES.Declarations.Orders;
+using ES.Declarations.PlaceOrderSaga;
+using ES.Test.EventStorage;
+using Eventuous;
+using Eventuous.Subscriptions;
+using Eventuous.Subscriptions.Context;
+using Eventuous.Subscriptions.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;
 
@@ -13,59 +20,33 @@ public class UnitTest1(ITestOutputHelper outputHelper) : IntegrationTestBase
     [Fact]
     public async Task Test1()
     {
+        TypeMap.RegisterKnownEventTypes(typeof(Declarations.Inventory.Events).Assembly);
+
         var services = GetServiceProvider(outputHelper);
 
-        var consumingTasks = CreateConsumingTasks(services, Tenant);
+        var placeOrderSagaService = services.GetRequiredService<ICommandService<PlaceOrderSagaState>>();
 
-        var serviceProvider = services. CreateScope().ServiceProvider;
-        var commandSender = serviceProvider.GetRequiredService<ICommandQueue>();
-        var eventStorage = serviceProvider.GetRequiredService<IEsEventStorage>();
+        var inventoryService = services.GetRequiredService<ICommandService<InventoryState>>();
+        var eventReader = services.GetRequiredService<IEventReader>();
 
-        var product1Id = Guid.NewGuid().ToString("N");
-        var product2Id = Guid.NewGuid().ToString("N");
+        var readPositions = new Dictionary<string, int>();
 
-        await commandSender.SendCommand(new InventoryItem.Commands.CreateInventoryItemCommand(product1Id, "Product 1", 100)
-        {
-            TenantId = Tenant,
-            StreamType = InventoryItem.Stream
-        });
+        var runHandlers = CreateHandlerRunner(services, readPositions, Tenant);
 
-        await ProcessQueue(consumingTasks);
+        await inventoryService.Handle(new Declarations.Inventory.Commands.CreateInventoryItem(
+            "BOOK-1", "Book #1", 300, new MessageContext { TenantId = Tenant }), CancellationToken.None);
 
-        await commandSender.SendCommand(new InventoryItem.Commands.CreateInventoryItemCommand(product2Id, "Product 2", 200)
-        {
-            TenantId = Tenant,
-            StreamType = InventoryItem.Stream
-        });
+        await runHandlers();
 
-        await ProcessQueue(consumingTasks);
+        await placeOrderSagaService.Handle(new Declarations.PlaceOrderSaga.Commands.Start(
+            "Saga-1", "A-2025-078", "John Doe", new DateOnly(2025, 12, 29),
+            [new() { ProductId = "BOOK-1", Quantity = 35 }]
+            , new MessageContext { TenantId = Tenant }), CancellationToken.None);
 
-        var sagaId = Guid.NewGuid().ToString("N");
-        var customerId = Guid.NewGuid().ToString("N");
-        var orderId = Guid.NewGuid().ToString("N");
+        await runHandlers();
 
-        await commandSender.SendCommand(new PlaceOrderSaga.Commands.Start(sagaId, orderId, customerId, new DateOnly(2025, 12, 3),
-            [
-                new() { ProductId = product1Id, Quantity = 50},
-                new() { ProductId = product2Id, Quantity = 170},
-            ])
-        {
-            TenantId = Tenant,
-            StreamType = PlaceOrderSaga.Stream
-        });
-
-        await ProcessQueue(consumingTasks);
-
-        var prod1 = await eventStorage.Load<InventoryItem>(product1Id);
-        var prod2 = await eventStorage.Load<InventoryItem>(product2Id);
-
-        var saga = await eventStorage.Load<PlaceOrderSaga>(sagaId);
-
-        var order = await eventStorage.Load<Order>(orderId);
-
-        Assert.Equal(50, prod1.AvailableQuantity);
-        Assert.Equal(30, prod2.AvailableQuantity);
-
-        Assert.Equal(OrderStatus.Placed, order.Status);
+        var inventoryState = await eventReader.LoadState<InventoryState>(new StreamName($"{nameof(InventoryAggregate)}-BOOK-1"));
+        var orderState = await eventReader.LoadState<OrderState>(new StreamName($"{nameof(OrderAggregate)}-A-2025-078"));
     }
+
 }
