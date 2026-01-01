@@ -51,7 +51,6 @@ namespace ES.Test.Sagas
 
                 if (ctx.Message.ParseCorrelationId().StreamType != PlaceOrderSagaAggregate.Name)
                 {
-                    //ctx.Ignore(nameof(Declarations.Inventory.Events.ProductReserved));
                     return;
                 }
 
@@ -66,7 +65,6 @@ namespace ES.Test.Sagas
 
                 if (ctx.Message.ParseCorrelationId().StreamType != PlaceOrderSagaAggregate.Name)
                 {
-                    //ctx.Ignore(nameof(Declarations.Inventory.Events.ProductReservationFailed));
                     return;
                 }
 

@@ -27,19 +27,14 @@ namespace ES.Declarations.UpdateOrderSaga
 
             On<Events.ProductReservedOrReleased>((state, evt) =>
             {
-                Changes.First(x => x.ProductId == evt.ProductId).ReservedSuccessfuly = true;
+                state.Changes.First(x => x.ProductId == evt.ProductId).ReservedSuccessfuly = true;
                 return state;
             });
 
             On<Events.ReservationFailed>((state, evt) =>
             {
-                Changes.First(x => x.ProductId == evt.ProductId).FailedToReserve = true;
+                state.Changes.First(x => x.ProductId == evt.ProductId).FailedToReserve = true;
                 return state;
-            });
-
-            On<Events.SetResult>((state, evt) => state with
-            {
-                Result = evt.Result
             });
 
             On<Events.OrderUpdateStatus>((state, evt) => state with

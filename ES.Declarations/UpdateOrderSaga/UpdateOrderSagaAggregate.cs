@@ -12,12 +12,13 @@ namespace ES.Declarations.UpdateOrderSaga
         public void MarkProductReservationFailed(string productId, IMessageContext context)
         {
             Apply(new Events.ReservationFailed(productId, context));
+
             var productIdsToCancelReservations = State.Changes
                 .Where(s => s.ReservedSuccessfuly)
                 .Select(x => x.ProductId)
                 .ToArray();
 
-            Apply(new Events.SetResult("Failed", State.OrderId, productIdsToCancelReservations, context));
+            Apply(new Events.ReservationsCancellingNeeded(State.OrderId, productIdsToCancelReservations, context));
         }
 
         public void MarkProductReservedOrReleased(string productId, IMessageContext context)
@@ -25,12 +26,19 @@ namespace ES.Declarations.UpdateOrderSaga
             Apply(new Events.ProductReservedOrReleased(productId, context));
 
             if (State.Changes.All(x => x.ReservedSuccessfuly))
-                Apply(new Events.SetResult("Success", State.OrderId, [], context));
+            {
+                var changes = State.Changes
+                    .Select(x => new OrderItemChange(x.ProductId, x.AdjustQuantityBy))
+                    .ToArray();
+
+                Apply(new Events.AllProductsReserved(State.OrderId, changes, context));
+            }
         }
 
         public void Start(string sagaId, string orderId, List<OrderItemChange> changes, IMessageContext context)
         {
-            Apply(new Events.Started(sagaId, changes, orderId, context));
+            Apply(new Events.Started(sagaId, changes, orderId, 
+                new MessageContext(context.TenantId, $"{Name}:{sagaId}")));
         }
 
         public void UpodateStatus(bool success, IMessageContext context)

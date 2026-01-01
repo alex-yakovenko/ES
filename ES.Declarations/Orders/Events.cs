@@ -6,7 +6,7 @@ namespace ES.Declarations.Orders
 {
     public static class Events
     {
-        [EventType("V1.OrderDrafted")]
+        [EventType($"V1.{nameof(OrderDrafted)}")]
         public record OrderDrafted(
             string OrderId,
             string CustomerId,
@@ -15,24 +15,24 @@ namespace ES.Declarations.Orders
             IMessageContext Context
         ) : MessageContext(Context);
 
-        [EventType("V1.OrderCanceled")]
+        [EventType($"V1.{nameof(OrderCanceled)}")]
         public record OrderCanceled(
             string Reason,
             IMessageContext Context
         ) : MessageContext(Context);
 
-        [EventType("V1.OrderPlaced")]
+        [EventType($"V1.{nameof(OrderPlaced)}")]
         public record OrderPlaced(
             IMessageContext Context
         ) : MessageContext(Context);
 
-        [EventType("V1.ItemsAdjusted")]
+        [EventType($"V1.{nameof(ItemsAdjusted)}")]
         public record ItemsAdjusted(
             OrderItemChange[] Changes,
             IMessageContext Context
         ) : MessageContext(Context);
 
-        [EventType("V1.ItemsAdjustingFialeded")]
+        [EventType($"V1.{nameof(ItemsAdjustingFialeded)}")]
         public record ItemsAdjustingFialeded(
             IMessageContext Context
         ) : MessageContext(Context);

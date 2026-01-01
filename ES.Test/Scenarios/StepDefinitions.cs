@@ -10,13 +10,11 @@ using Reqnroll;
 using System;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ES.Test.Scenarios
 {
     [Binding]
-    public class StepDefinitions
-        : IntegrationTestBase
+    public class StepDefinitions : IntegrationTestBase
     {
         public const string Tenant = "Tenant-123";
 
@@ -47,7 +45,6 @@ namespace ES.Test.Scenarios
         {
 
         }
-
 
         [Given("product with SKU {string} and available quantity {int} is present in inventory")]
         public async Task GivenProductWithSKUAndAvailableQuantityIsPresentInInventory(string sku, int quantity)
@@ -105,7 +102,9 @@ namespace ES.Test.Scenarios
         [Then("order {string} has status {string} with items as follows:")]
         public async Task ThenOrderHasStatus(string orderId, string expectedStatus, DataTable dataTable)
         {
-            var order = (await eventReader.LoadState<OrderState>(new StreamName($"{nameof(OrderAggregate)}-{orderId}"))).State;
+            var streamName = new StreamName($"{nameof(OrderAggregate)}-{orderId}");
+            var orderEvents = await eventReader.ReadEvents(streamName, StreamReadPosition.Start, 100, CancellationToken.None);
+            var order = (await eventReader.LoadState<OrderState>(streamName)).State;
             Assert.Equal(dataTable.RowCount, order.Items.Count);
 
             for (var i = 0; i < order.Items.Count; i++)

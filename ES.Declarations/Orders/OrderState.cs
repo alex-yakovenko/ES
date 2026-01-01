@@ -21,7 +21,7 @@ namespace ES.Declarations.Orders
                 TenantId = e.TenantId,
                 CustomerId = e.CustomerId,
                 Date = e.Date,
-                Items = [.. e.Items],
+                Items = [.. e.Items.Select(x => x with { })],
                 Status = OrderStatus.Draft
             });
 

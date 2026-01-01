@@ -8,16 +8,19 @@ namespace ES.Test.Sagas
     public class UpdateOrderSaga : Eventuous.Subscriptions.EventHandler
     {
         private readonly ICommandService<Declarations.Inventory.InventoryState> _inventoryService;
+        private readonly ICommandService<Declarations.Orders.OrderState> _orderService;
         private readonly ICommandService<Declarations.UpdateOrderSaga.UpdateOrderSagaState> _updateOrderSagaService;
 
         public UpdateOrderSaga(
             ICommandService<Declarations.Inventory.InventoryState> inventoryService,
-            ICommandService<Declarations.UpdateOrderSaga.UpdateOrderSagaState> updateOrderSagaService)
+            ICommandService<Declarations.UpdateOrderSaga.UpdateOrderSagaState> updateOrderSagaService,
+            ICommandService<Declarations.Orders.OrderState> orderService)
         {
             _inventoryService = inventoryService;
             _updateOrderSagaService = updateOrderSagaService;
+            _orderService = orderService;
 
-            On<Declarations.UpdateOrderSaga.Events.Started>(async ctx => 
+            On<Declarations.UpdateOrderSaga.Events.Started>(async ctx =>
             {
                 var evt = ctx.Message;
                 foreach (var product in evt.Changes)
@@ -29,22 +32,37 @@ namespace ES.Test.Sagas
                     else
                     {
                         await _inventoryService.Handle(new Declarations.Inventory.Commands.ReleaseProduct(
-                            product.ProductId, - product.AdjustQuantityBy, evt.OrderId, evt), ctx.CancellationToken);
+                            product.ProductId, -product.AdjustQuantityBy, evt.OrderId, evt), ctx.CancellationToken);
                     }
             });
 
-            On<Declarations.Orders.Events.ItemsAdjusted>(async ctx => 
+            On<Declarations.Orders.Events.ItemsAdjusted>(async ctx =>
             {
                 var evt = ctx.Message;
 
                 if (evt.ParseCorrelationId().StreamType != UpdateOrderSagaAggregate.Name)
                 {
-                    ctx.Ignore(nameof(Declarations.Orders.Events.ItemsAdjusted));
                     return;
                 }
 
-                var cmd = new Declarations.UpdateOrderSaga.Commands.UpdateStatus(evt.ParseCorrelationId().SagaId, true, evt);
-                
+                var cmd = new Declarations.UpdateOrderSaga.Commands.UpdateStatus(
+                    evt.ParseCorrelationId().SagaId, true, evt);
+
+                await _updateOrderSagaService.Handle(cmd, ctx.CancellationToken);
+            });
+
+            On<Declarations.Orders.Events.ItemsAdjustingFialeded>(async ctx =>
+            {
+                var evt = ctx.Message;
+
+                if (evt.ParseCorrelationId().StreamType != UpdateOrderSagaAggregate.Name)
+                {
+                    return;
+                }
+
+                var cmd = new Declarations.UpdateOrderSaga.Commands.UpdateStatus(
+                    evt.ParseCorrelationId().SagaId, false, evt);
+
                 await _updateOrderSagaService.Handle(cmd, ctx.CancellationToken);
             });
 
@@ -53,7 +71,6 @@ namespace ES.Test.Sagas
 
                 if (ctx.Message.ParseCorrelationId().StreamType != UpdateOrderSagaAggregate.Name)
                 {
-                    //ctx.Ignore(nameof(Declarations.Inventory.Events.ProductReserved));
                     return;
                 }
 
@@ -68,7 +85,6 @@ namespace ES.Test.Sagas
 
                 if (ctx.Message.ParseCorrelationId().StreamType != UpdateOrderSagaAggregate.Name)
                 {
-                    ctx.Ignore(nameof(Declarations.Inventory.Events.ProductReserved));
                     return;
                 }
 
@@ -83,7 +99,6 @@ namespace ES.Test.Sagas
 
                 if (ctx.Message.ParseCorrelationId().StreamType != UpdateOrderSagaAggregate.Name)
                 {
-                    ctx.Ignore(nameof(Declarations.Inventory.Events.ProductReservationFailed));
                     return;
                 }
 
@@ -93,15 +108,28 @@ namespace ES.Test.Sagas
                         ctx.Message.ProductId, ctx.Message), ctx.CancellationToken);
             });
 
-            On<Events.SetResult>(async ctx => 
+            On<Events.AllProductsReserved>(async ctx =>
             {
                 var evt = ctx.Message;
-                foreach (var productId in evt.ProductIdsToCancelReservations)
+                var changes = evt.Changes
+                    .Select(x => new Declarations.OrderItemChange(
+                        x.ProductId, x.AdjustQuantityBy))
+                    .ToArray();
+
+                await orderService.Handle(new Declarations.Orders.Commands.AdjustProducts(
+                    evt.OrderId, changes, evt), ctx.CancellationToken);
+            });
+
+            On<Events.ReservationsCancellingNeeded>(async ctx =>
+            {
+                var evt = ctx.Message;
+                foreach (var productId in evt.ProductIdsToCancelReservation)
                 {
                     await inventoryService.Handle(new Declarations.Inventory.Commands.CancelProductReservation(
                         productId, evt.OrderId, evt), ctx.CancellationToken);
                 }
             });
+
         }
 
     }
