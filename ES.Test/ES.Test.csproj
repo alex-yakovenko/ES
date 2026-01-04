@@ -34,7 +34,6 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
-	  <PackageReference Include="Eventuous" Version="0.15.1" />
   </ItemGroup>
 
 </Project>

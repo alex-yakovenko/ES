@@ -12,17 +12,20 @@ using Eventuous.Subscriptions;
 using Eventuous.Subscriptions.Context;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Eventuous.Diagnostics.Logging;
 using Xunit.Abstractions;
+using Microsoft.Extensions.Hosting;
 
 namespace ES.Test;
 
-public class IntegrationTestBase
+public class IntegrationTestBase : IDisposable
 {
-    protected IServiceProvider? GetServiceProvider(ITestOutputHelper outputHelper,
+    private readonly List<IDisposable> _disposables = [];
+
+    protected IServiceProvider GetServiceProvider(ITestOutputHelper outputHelper,
         LogLevel debugMinLevel = LogLevel.Information)
     {
-        var eventStore = new TestEventStore();
-        return new ServiceCollection()
+        var services = new ServiceCollection()
             .AddCommandService<InventoryService, InventoryState>()
             .AddCommandService<OrderService, OrderState>()
             .AddCommandService<PlaceOrderSagaService, PlaceOrderSagaState>()
@@ -30,6 +33,7 @@ public class IntegrationTestBase
             .AddEventStore<TestEventStore>()
             .AddScoped<IEventHandler, PlaceOrderSaga>()
             .AddScoped<IEventHandler, UpdateOrderSaga>()
+
             .AddLogging(builder =>
             {
                 builder.AddDebug();
@@ -37,6 +41,14 @@ public class IntegrationTestBase
                 builder.SetMinimumLevel(debugMinLevel);
             })
             .BuildServiceProvider();
+
+        services.AddEventuousLogs(System.Diagnostics.Tracing.EventLevel.LogAlways);
+
+        var listener = new LoggingEventListener(services.GetRequiredService<ILoggerFactory>());
+        _disposables.Add(listener);
+        _disposables.Add(services);
+
+        return services;
     }
 
     protected Func<Task> CreateHandlerRunner(IServiceProvider services, Dictionary<string, int> readPositions,
@@ -88,5 +100,13 @@ public class IntegrationTestBase
                 }
             } while (totalEventsRead > 0);
         };
+    }
+
+    public void Dispose()
+    {
+        foreach (var disposable in _disposables)
+        {
+            disposable.Dispose();
+        }
     }
 }

@@ -1,8 +1,10 @@
 ﻿using Eventuous;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace ES.Test;
 
-public class TestEventStore : IEventStore
+public class TestEventStore(ILogger<TestEventStore> logger) : IEventStore
 {
     private readonly Queue<(StreamName stream, NewStreamEvent evt, long version)> _events = new();
     public Task<AppendEventsResult> AppendEvents(StreamName stream, ExpectedStreamVersion expectedVersion, IReadOnlyCollection<NewStreamEvent> events, CancellationToken cancellationToken)
@@ -22,8 +24,14 @@ public class TestEventStore : IEventStore
 
         long version = last.stream == default ? -1 : last.version;
 
-        foreach ( var evt in events)
+        foreach (var evt in events)
+        {
             _events.Enqueue((stream, evt, ++version));
+
+            var json = JsonConvert.SerializeObject(evt.Payload);
+            logger.LogInformation("Added event: {eventType}, stream: {stream}, payload: {json}", 
+                evt.Payload?.GetType().Name, stream, json);
+        }
 
         return Task.FromResult(new AppendEventsResult((ulong)_events.Count, version));
     }
