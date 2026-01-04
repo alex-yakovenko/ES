@@ -45,7 +45,7 @@ public class UnitTest1(ITestOutputHelper outputHelper) : IntegrationTestBase
 
         await runHandlers();
 
-        var inventoryState = await eventReader.LoadState<InventoryState>(new StreamName($"{nameof(InventoryAggregate)}-BOOK-1"));
+        var inventoryState = await eventReader.LoadState<InventoryState>(new StreamName($"Products-BOOK-1"));
         var orderState = await eventReader.LoadState<OrderState>(new StreamName($"{nameof(OrderAggregate)}-A-2025-078"));
     }
 

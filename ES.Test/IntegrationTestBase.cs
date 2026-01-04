@@ -22,7 +22,7 @@ public class IntegrationTestBase
     {
         var eventStore = new TestEventStore();
         return new ServiceCollection()
-            .AddCommandService<InventoryService, InventoryState>()
+            .AddCommandService<InventoryService1, InventoryState>()
             .AddCommandService<OrderService, OrderState>()
             .AddCommandService<PlaceOrderSagaService, PlaceOrderSagaState>()
             .AddCommandService<UpdateOrderSagaService, UpdateOrderSagaState>()

@@ -94,7 +94,7 @@ namespace ES.Test.Scenarios
         [Then("product {string} available quantity becomes {int}")]
         public async Task ThenProductAvailableQuantityBecomes(string sku, int expectedQuantity)
         {
-            var product = await eventReader.LoadState<InventoryState>(new StreamName($"{nameof(InventoryAggregate)}-{sku}"));
+            var product = await eventReader.LoadState<InventoryState>(new StreamName($"Products-{sku}"));
 
             Assert.Equal(expectedQuantity, product.State.AvailableQuantity);
         }
