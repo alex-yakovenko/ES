@@ -38,6 +38,14 @@ public class UnitTest1(ITestOutputHelper outputHelper) : IntegrationTestBase
 
         await runHandlers();
 
+        await inventoryService.Handle(new Declarations.Inventory.Commands.ReserveProduct(
+            "BOOK-1", 20, "Order #1", new MessageContext { TenantId = Tenant }), CancellationToken.None);
+
+        await runHandlers();
+
+        await inventoryService.Handle(new Declarations.Inventory.Commands.ReserveProduct(
+            "BOOK-1", 15, "Order #2", new MessageContext { TenantId = Tenant }), CancellationToken.None);
+
         await placeOrderSagaService.Handle(new Declarations.PlaceOrderSaga.Commands.Start(
             "Saga-1", "A-2025-078", "John Doe", new DateOnly(2025, 12, 29),
             [new() { ProductId = "BOOK-1", Quantity = 35 }]
@@ -46,7 +54,6 @@ public class UnitTest1(ITestOutputHelper outputHelper) : IntegrationTestBase
         await runHandlers();
 
         var inventoryState = await eventReader.LoadState<InventoryState>(new StreamName($"Products-BOOK-1"));
-        var orderState = await eventReader.LoadState<OrderState>(new StreamName($"{nameof(OrderAggregate)}-A-2025-078"));
+        var orderState = await eventReader.LoadState<OrderState>(new StreamName($"OrderAggregate-A-2025-078"));
     }
-
 }

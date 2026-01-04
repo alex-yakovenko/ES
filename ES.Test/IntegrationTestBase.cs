@@ -18,30 +18,29 @@ namespace ES.Test;
 
 public class IntegrationTestBase
 {
-    protected IServiceProvider? GetServiceProvider(ITestOutputHelper outputHelper, LogLevel debugMinLevel = LogLevel.Information)
+    protected IServiceProvider? GetServiceProvider(ITestOutputHelper outputHelper,
+        LogLevel debugMinLevel = LogLevel.Information)
     {
         var eventStore = new TestEventStore();
         return new ServiceCollection()
-            .AddCommandService<InventoryService1, InventoryState>()
+            .AddCommandService<InventoryService, InventoryState>()
             .AddCommandService<OrderService, OrderState>()
             .AddCommandService<PlaceOrderSagaService, PlaceOrderSagaState>()
             .AddCommandService<UpdateOrderSagaService, UpdateOrderSagaState>()
-
             .AddEventStore<TestEventStore>()
-
             .AddScoped<IEventHandler, PlaceOrderSaga>()
             .AddScoped<IEventHandler, UpdateOrderSaga>()
-
-            .AddLogging(builder => {
+            .AddLogging(builder =>
+            {
                 builder.AddDebug();
                 builder.AddXUnit(outputHelper);
                 builder.SetMinimumLevel(debugMinLevel);
             })
-
             .BuildServiceProvider();
     }
 
-    protected Func<Task> CreateHandlerRunner(IServiceProvider services, Dictionary<string, int> readPositions, string tenant)
+    protected Func<Task> CreateHandlerRunner(IServiceProvider services, Dictionary<string, int> readPositions,
+        string tenant)
     {
         var eventReader = services.GetRequiredService<IEventReader>();
 
@@ -90,5 +89,4 @@ public class IntegrationTestBase
             } while (totalEventsRead > 0);
         };
     }
-
 }

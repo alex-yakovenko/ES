@@ -37,31 +37,31 @@ namespace ES.Test.Scenarios
             updateOrderSagaService = services.GetRequiredService<ICommandService<UpdateOrderSagaState>>();
             inventoryService = services.GetRequiredService<ICommandService<InventoryState>>();
             eventReader = services.GetRequiredService<IEventReader>();
-
         }
-         
+
         [Given("All flows are configured")]
         public void GivenAllFlowsAreConfigured()
         {
-
         }
 
         [Given("product with SKU {string} and available quantity {int} is present in inventory")]
         public async Task GivenProductWithSKUAndAvailableQuantityIsPresentInInventory(string sku, int quantity)
         {
-            await inventoryService.Handle(new Declarations.Inventory.Commands.CreateInventoryItem(sku, sku, quantity, new MessageContext 
-            { 
-                TenantId = Tenant
-            }), CancellationToken.None);
+            await inventoryService.Handle(new Declarations.Inventory.Commands.CreateInventoryItem(sku, sku, quantity,
+                new MessageContext
+                {
+                    TenantId = Tenant
+                }), CancellationToken.None);
 
             await runHandlers();
         }
 
         [Given("having placed order for {string}, date {string}, ID {string} and products as follows:")]
-        [When( "placing order for {string}, date {string}, ID {string} and products as follows:")]
-        public async Task WhenPlacingOrderForDateIDAndProductsAsFollows(string customer, string date, string orderId, DataTable dataTable)
+        [When("placing order for {string}, date {string}, ID {string} and products as follows:")]
+        public async Task WhenPlacingOrderForDateIDAndProductsAsFollows(string customer, string date, string orderId,
+            DataTable dataTable)
         {
-            var command = new Declarations.PlaceOrderSaga.Commands.Start($"place-order-{orderId}", orderId, 
+            var command = new Declarations.PlaceOrderSaga.Commands.Start($"place-order-{orderId}", orderId,
                 customer, DateOnly.Parse(date), [], new MessageContext(Tenant));
 
             foreach (var row in dataTable.Rows)
@@ -79,7 +79,7 @@ namespace ES.Test.Scenarios
         [When("updating order {string} product changes as follows:")]
         public async Task WhenUpdatingOrderProductChangesAsFollows(string orderId, DataTable dataTable)
         {
-            var command = new Declarations.UpdateOrderSaga.Commands.Start($"update-order-{orderId}", 
+            var command = new Declarations.UpdateOrderSaga.Commands.Start($"update-order-{orderId}",
                 orderId, [], new MessageContext(Tenant));
 
             foreach (var row in dataTable.Rows)
@@ -102,8 +102,9 @@ namespace ES.Test.Scenarios
         [Then("order {string} has status {string} with items as follows:")]
         public async Task ThenOrderHasStatus(string orderId, string expectedStatus, DataTable dataTable)
         {
-            var streamName = new StreamName($"{nameof(OrderAggregate)}-{orderId}");
-            var orderEvents = await eventReader.ReadEvents(streamName, StreamReadPosition.Start, 100, CancellationToken.None);
+            var streamName = new StreamName($"OrderAggregate-{orderId}");
+            var orderEvents =
+                await eventReader.ReadEvents(streamName, StreamReadPosition.Start, 100, CancellationToken.None);
             var order = (await eventReader.LoadState<OrderState>(streamName)).State;
             Assert.Equal(dataTable.RowCount, order.Items.Count);
 
@@ -115,6 +116,5 @@ namespace ES.Test.Scenarios
 
             Assert.Equal(expectedStatus, order.Status);
         }
-       
     }
 }

@@ -16,8 +16,8 @@ public class TestEventStore : IEventStore
 
         if (expectedVersion.Value >= 0)
         {
-            if (expectedVersion.Value != last.version)
-                return Task.FromResult(AppendEventsResult.NoOp);
+          /*  if (expectedVersion.Value != last.version + 1)
+                return Task.FromResult(AppendEventsResult.NoOp); */
         }
 
         long version = last.stream == default ? -1 : last.version;

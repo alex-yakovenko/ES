@@ -28,12 +28,12 @@ namespace ES.Test.Sagas
                 var msg = ctx.Message;
                 await _orderService.Handle(
                     new Declarations.Orders.Commands.DraftOrder(msg.OrderId,
-                    msg.CustomerId, msg.Date, msg.Items,
-                    new MessageContext
-                    {
-                        TenantId = msg.TenantId,
-                        CorrelationId = $"{PlaceOrderSagaAggregate.Name}:{msg.SagaId}"
-                    }), ctx.CancellationToken);
+                        msg.CustomerId, msg.Date, msg.Items,
+                        new MessageContext
+                        {
+                            TenantId = msg.TenantId,
+                            CorrelationId = $"PlaceOrderSaga:{msg.SagaId}"
+                        }), ctx.CancellationToken);
 
                 foreach (var item in ctx.Message.Items)
                 {
@@ -48,22 +48,20 @@ namespace ES.Test.Sagas
 
             On<Declarations.Inventory.Events.ProductReserved>(async ctx =>
             {
-
-                if (ctx.Message.ParseCorrelationId().StreamType != PlaceOrderSagaAggregate.Name)
+                if (ctx.Message.ParseCorrelationId().StreamType != "PlaceOrderSaga")
                 {
                     return;
                 }
 
                 await _placeOrderSagaService.Handle(
                     new Commands.MarkProductReserved(
-                        ctx.Message.ParseCorrelationId().SagaId, 
+                        ctx.Message.ParseCorrelationId().SagaId,
                         ctx.Message.ProductId, ctx.Message), ctx.CancellationToken);
             });
 
             On<Declarations.Inventory.Events.ProductReservationFailed>(async ctx =>
             {
-
-                if (ctx.Message.ParseCorrelationId().StreamType != PlaceOrderSagaAggregate.Name)
+                if (ctx.Message.ParseCorrelationId().StreamType != "PlaceOrderSaga")
                 {
                     return;
                 }
@@ -85,7 +83,7 @@ namespace ES.Test.Sagas
             {
                 await _orderService.Handle(
                     new Declarations.Orders.Commands.CancelOrder(
-                        ctx.Message.OrderId, "Failed to reserve products.",  ctx.Message), ctx.CancellationToken);
+                        ctx.Message.OrderId, "Failed to reserve products.", ctx.Message), ctx.CancellationToken);
 
                 foreach (var productId in ctx.Message.ProductIds)
                 {

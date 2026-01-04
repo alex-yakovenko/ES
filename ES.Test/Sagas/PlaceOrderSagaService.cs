@@ -1,40 +1,66 @@
-﻿using ES.Declarations;
 using ES.Declarations.PlaceOrderSaga;
-using ES.Declarations.UpdateOrderSaga;
+using ES.Core;
 using Eventuous;
-using Commands = ES.Declarations.PlaceOrderSaga.Commands;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace ES.Test.Sagas
 {
-
-    public record PlaceOrderSagaId(string Id): Id(Id);
-
-    public class PlaceOrderSagaService : CommandService<PlaceOrderSagaAggregate, PlaceOrderSagaState, PlaceOrderSagaId>
+    public class PlaceOrderSagaService : CommandService<PlaceOrderSagaState>
     {
-        public PlaceOrderSagaService(IEventReader? reader, IEventWriter? writer) : base(reader, writer)
+        public PlaceOrderSagaService(IEventReader reader, IEventWriter writer) : base(reader, writer)
         {
             On<Commands.Start>()
                 .InState(ExpectedState.New)
-                .GetId(cmd => new PlaceOrderSagaId(cmd.SagaId))
-                .Act((saga, cmd) =>
-                {
-                    saga.Start(cmd);
-                });
+                .GetStream(cmd => new StreamName($"PlaceOrderSaga-{cmd.SagaId}"))
+                .Act((state, events, cmd) =>
+                [
+                    new Events.Started(cmd.SagaId, cmd.OrderId, cmd.CustomerId,
+                        cmd.Date, cmd.Items,
+                        new MessageContext
+                            { TenantId = cmd.TenantId, CorrelationId = $"PlaceOrderSaga:{cmd.SagaId}" })
+                ]);
 
             On<Commands.MarkProductReserved>()
                 .InState(ExpectedState.Existing)
-                .GetId(cmd => new PlaceOrderSagaId(cmd.SagaId))
-                .Act((saga, cmd) => 
-                { 
-                    saga.ReserveProduct(cmd.ProductId, cmd); 
+                .GetStream(cmd => new StreamName($"PlaceOrderSaga-{cmd.SagaId}"))
+                .Act((state, events, cmd) =>
+                {
+                    var eventsToReturn = new List<object> { new Events.ProductReserved(cmd.ProductId, cmd) };
+
+                    var allSatisfied = state.ItemsToReserve.All(x =>
+                        x.ProductId == cmd.ProductId
+                            ? !x.ReservationFailed
+                            : (x.ProductReserved && !x.ReservationFailed)
+                    );
+
+                    if (allSatisfied && !state.OrderCanBePlaced)
+                    {
+                        eventsToReturn.Add(new Events.OrderCanBePlaced(state.OrderId, cmd));
+                    }
+
+                    return eventsToReturn;
                 });
 
             On<Commands.MarkProductReservationFailed>()
                 .InState(ExpectedState.Existing)
-                .GetId(cmd => new PlaceOrderSagaId(cmd.SagaId))
-                .Act((saga, cmd) =>
+                .GetStream(cmd => new StreamName($"PlaceOrderSaga-{cmd.SagaId}"))
+                .Act((state, events, cmd) =>
                 {
-                    saga.CancelProductReservation(cmd.ProductId, cmd);
+                    var eventsToReturn = new List<object> { new Events.ProductReservationFailed(cmd.ProductId, cmd) };
+
+                    if (!state.OrderNeedsToBeCancelled)
+                    {
+                        var reservationsToCancel = state.ItemsToReserve
+                            .Where(x => !x.ReservationFailed && x.ProductId != cmd.ProductId)
+                            .Select(x => x.ProductId)
+                            .ToList();
+
+                        eventsToReturn.Add(
+                            new Events.OrderNeedsToBeCancelled(state.OrderId, reservationsToCancel, cmd));
+                    }
+
+                    return eventsToReturn;
                 });
         }
     }

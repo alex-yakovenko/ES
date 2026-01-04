@@ -40,7 +40,7 @@ namespace ES.Test.Sagas
             {
                 var evt = ctx.Message;
 
-                if (evt.ParseCorrelationId().StreamType != UpdateOrderSagaAggregate.Name)
+                if (evt.ParseCorrelationId().StreamType != "UpdateOrderSaga")
                 {
                     return;
                 }
@@ -55,7 +55,7 @@ namespace ES.Test.Sagas
             {
                 var evt = ctx.Message;
 
-                if (evt.ParseCorrelationId().StreamType != UpdateOrderSagaAggregate.Name)
+                if (evt.ParseCorrelationId().StreamType != "UpdateOrderSaga")
                 {
                     return;
                 }
@@ -68,8 +68,7 @@ namespace ES.Test.Sagas
 
             On<Declarations.Inventory.Events.ProductReserved>(async ctx =>
             {
-
-                if (ctx.Message.ParseCorrelationId().StreamType != UpdateOrderSagaAggregate.Name)
+                if (ctx.Message.ParseCorrelationId().StreamType != "UpdateOrderSaga")
                 {
                     return;
                 }
@@ -82,8 +81,7 @@ namespace ES.Test.Sagas
 
             On<Declarations.Inventory.Events.ProductReleased>(async ctx =>
             {
-
-                if (ctx.Message.ParseCorrelationId().StreamType != UpdateOrderSagaAggregate.Name)
+                if (ctx.Message.ParseCorrelationId().StreamType != "UpdateOrderSaga")
                 {
                     return;
                 }
@@ -96,8 +94,7 @@ namespace ES.Test.Sagas
 
             On<Declarations.Inventory.Events.ProductReservationFailed>(async ctx =>
             {
-
-                if (ctx.Message.ParseCorrelationId().StreamType != UpdateOrderSagaAggregate.Name)
+                if (ctx.Message.ParseCorrelationId().StreamType != "UpdateOrderSaga")
                 {
                     return;
                 }
@@ -129,8 +126,6 @@ namespace ES.Test.Sagas
                         productId, evt.OrderId, evt), ctx.CancellationToken);
                 }
             });
-
         }
-
     }
 }
