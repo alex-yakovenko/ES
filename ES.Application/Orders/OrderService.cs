@@ -11,7 +11,7 @@ namespace ES.Application.Orders
         {
             On<Commands.DraftOrder>()
                 .InState(ExpectedState.New)
-                .GetStream(cmd => new StreamName($"OrderAggregate-{cmd.OrderId}"))
+                .GetStream(cmd => new StreamName($"Order-{cmd.OrderId}"))
                 .Act((state, events, cmd) =>
                 [
                     new Events.OrderDrafted(cmd.OrderId, cmd.CustomerId, cmd.Date, cmd.Items, cmd.TenantId,
@@ -20,7 +20,7 @@ namespace ES.Application.Orders
 
             On<Commands.SetOrderPlaced>()
                 .InState(ExpectedState.Existing)
-                .GetStream(cmd => new StreamName($"OrderAggregate-{cmd.OrderId}"))
+                .GetStream(cmd => new StreamName($"Order-{cmd.OrderId}"))
                 .Act((state, events, cmd) => events.OfType<Events.OrderPlaced>()
                     .Any(x => x.CorrelationId == cmd.CorrelationId) 
                         ?[]
@@ -30,7 +30,7 @@ namespace ES.Application.Orders
 
             On<Commands.CancelOrder>()
                 .InState(ExpectedState.Existing)
-                .GetStream(cmd => new StreamName($"OrderAggregate-{cmd.OrderId}"))
+                .GetStream(cmd => new StreamName($"Order-{cmd.OrderId}"))
                 .Act((state, events, cmd) => events.OfType<Events.OrderCanceled>()
                     .Any(x => x.CorrelationId == cmd.CorrelationId)
                         ?[]
@@ -40,7 +40,7 @@ namespace ES.Application.Orders
 
             On<Commands.AdjustProducts>()
                 .InState(ExpectedState.Existing)
-                .GetStream(cmd => new StreamName($"OrderAggregate-{cmd.OrderId}"))
+                .GetStream(cmd => new StreamName($"Order-{cmd.OrderId}"))
                 .Act((state, events, cmd) =>
                 {
                     if (events.OfType<Events.ItemsAdjusted>()

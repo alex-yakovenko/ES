@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-namespace ES.Test;
+namespace ES.Test.EventStorage;
 
 public class TestEventStore(ILogger<TestEventStore> logger) : IEventStore
 {

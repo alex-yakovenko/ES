@@ -7,7 +7,9 @@ namespace ES.Declarations.Inventory
 {
     public static class Events
     {
-        [EventType($"V1.{nameof(InventoryItemCreated)}")]
+        public const string AggregateName = "Inventory";
+
+        [EventType($"V1.{AggregateName}.{nameof(InventoryItemCreated)}")]
         public record InventoryItemCreated(
             string Code,
             int InitialQuantity,
@@ -15,7 +17,7 @@ namespace ES.Declarations.Inventory
             string? CorrelationId = null
         ) : IMessageContext;
 
-        [EventType($"V1.{nameof(ProductReserved)}")]
+        [EventType($"V1.{AggregateName}.{nameof(ProductReserved)}")]
         public record ProductReserved(
             string ProductId,
             int Quantity,
@@ -24,7 +26,7 @@ namespace ES.Declarations.Inventory
             string? CorrelationId = null
         ) : IMessageContext;
 
-        [EventType($"V1.{nameof(ProductReservationFailed)}")]
+        [EventType($"V1.{AggregateName}.{nameof(ProductReservationFailed)}")]
         public record ProductReservationFailed(
             string ProductId,
             int Quantity,
@@ -33,14 +35,14 @@ namespace ES.Declarations.Inventory
             string? CorrelationId = null
         ) : IMessageContext;
 
-        [EventType($"V1.{nameof(ProductReservationCanceled)}")]
+        [EventType($"V1.{AggregateName}.{nameof(ProductReservationCanceled)}")]
         public record ProductReservationCanceled(
             string OrderId,
             string TenantId,
             string? CorrelationId = null
         ) : IMessageContext;
 
-        [EventType($"V1.{nameof(ProductReleased)}")]
+        [EventType($"V1.{AggregateName}.{nameof(ProductReleased)}")]
         public record ProductReleased(
             string ProductId,
             int Quantity,

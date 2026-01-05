@@ -16,6 +16,8 @@ using Microsoft.Extensions.Logging;
 using Eventuous.Diagnostics.Logging;
 using Xunit.Abstractions;
 using Microsoft.Extensions.Hosting;
+using System.Diagnostics;
+using Eventuous.Subscriptions.Logging;
 
 namespace ES.Test;
 
@@ -55,6 +57,7 @@ public class IntegrationTestBase : IDisposable
         string tenant)
     {
         var eventReader = services.GetRequiredService<IEventReader>();
+        var loggerFactory = services.GetRequiredService<ILoggerFactory>();
 
         var handlers = services.GetServices<IEventHandler>()
             .Select(x => (Func<Task<int>>)(async () =>
@@ -76,7 +79,10 @@ public class IntegrationTestBase : IDisposable
                     foreach (var evt in events)
                     {
                         var ctx = new MessageConsumeContext("", "", "", "-", 0,
-                            0, 0, 0, default, evt.Payload, evt.Metadata, "", CancellationToken.None);
+                            0, 0, 0, default, evt.Payload, evt.Metadata, "", CancellationToken.None)
+                        {
+                            LogContext = new LogContext(handlerName, loggerFactory)
+                        };
                         var result = await x.HandleEvent(ctx);
                         start++;
                     }

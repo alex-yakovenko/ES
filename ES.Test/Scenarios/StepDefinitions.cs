@@ -100,7 +100,7 @@ namespace ES.Test.Scenarios
         [Then("order {string} has status {string} with items as follows:")]
         public async Task ThenOrderHasStatus(string orderId, string expectedStatus, DataTable dataTable)
         {
-            var streamName = new StreamName($"OrderAggregate-{orderId}");
+            var streamName = new StreamName($"Order-{orderId}");
             var orderEvents =
                 await eventReader.ReadEvents(streamName, StreamReadPosition.Start, 100, CancellationToken.None);
             var order = (await eventReader.LoadState<OrderState>(streamName)).State;

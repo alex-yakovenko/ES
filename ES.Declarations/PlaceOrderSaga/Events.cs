@@ -6,7 +6,9 @@ namespace ES.Declarations.PlaceOrderSaga
 {
     public static class Events
     {
-        [EventType($"V1.{nameof(Started)}")]
+        public const string AggregateName = "PlaceOrderSaga";
+
+        [EventType($"V1.{AggregateName}.{nameof(Started)}")]
         public record Started(
             string SagaId,
             string OrderId,
@@ -16,22 +18,22 @@ namespace ES.Declarations.PlaceOrderSaga
             string TenantId,
             string? CorrelationId = null) : IMessageContext;
 
-        [EventType($"V1.{nameof(RezervationSent)}")]
+        [EventType($"V1.{AggregateName}.{nameof(RezervationSent)}")]
         public record RezervationSent(string ProductId, string TenantId, string? CorrelationId = null)
             : IMessageContext;
 
-        [EventType($"V1.{nameof(ProductReserved)}")]
+        [EventType($"V1.{AggregateName}.{nameof(ProductReserved)}")]
         public record ProductReserved(string ProductId, string TenantId, string? CorrelationId = null)
             : IMessageContext;
 
-        [EventType($"V1.{nameof(ProductReservationFailed)}")]
+        [EventType($"V1.{AggregateName}.{nameof(ProductReservationFailed)}")]
         public record ProductReservationFailed(string ProductId, string TenantId, string? CorrelationId = null)
             : IMessageContext;
 
-        [EventType($"V1.{nameof(OrderCanBePlaced)}")]
+        [EventType($"V1.{AggregateName}.{nameof(OrderCanBePlaced)}")]
         public record OrderCanBePlaced(string OrderId, string TenantId, string? CorrelationId = null) : IMessageContext;
 
-        [EventType($"V1.{nameof(OrderNeedsToBeCancelled)}")]
+        [EventType($"V1.{AggregateName}.{nameof(OrderNeedsToBeCancelled)}")]
         public record OrderNeedsToBeCancelled(
             string OrderId,
             List<string> ProductIds,

@@ -44,12 +44,14 @@ namespace ES.Application.Sagas
                             ctx.Message.CorrelationId
                         ), ctx.CancellationToken);
                 }
+                ctx.Ack(GetType().Name);
             });
 
             On<Declarations.Inventory.Events.ProductReserved>(async ctx =>
             {
                 if (ctx.Message.ParseCorrelationId().StreamType != "PlaceOrderSaga")
                 {
+                    ctx.Ignore(GetType().Name);
                     return;
                 }
 
@@ -60,12 +62,15 @@ namespace ES.Application.Sagas
                         ctx.Message.TenantId,
                         ctx.Message.CorrelationId
                     ), ctx.CancellationToken);
+
+                ctx.Ack(GetType().Name);
             });
 
             On<Declarations.Inventory.Events.ProductReservationFailed>(async ctx =>
             {
                 if (ctx.Message.ParseCorrelationId().StreamType != "PlaceOrderSaga")
                 {
+                    ctx.Ignore(GetType().Name);
                     return;
                 }
 
@@ -76,6 +81,8 @@ namespace ES.Application.Sagas
                         ctx.Message.TenantId,
                         ctx.Message.CorrelationId
                     ), ctx.CancellationToken);
+
+                ctx.Ack(GetType().Name);
             });
 
             On<Declarations.PlaceOrderSaga.Events.OrderCanBePlaced>(async ctx =>
@@ -86,6 +93,8 @@ namespace ES.Application.Sagas
                         ctx.Message.TenantId,
                         ctx.Message.CorrelationId
                     ), ctx.CancellationToken);
+
+                ctx.Ack(GetType().Name);
             });
 
             On<Declarations.PlaceOrderSaga.Events.OrderNeedsToBeCancelled>(async ctx =>
@@ -106,6 +115,8 @@ namespace ES.Application.Sagas
                             ctx.Message.CorrelationId
                         ), ctx.CancellationToken);
                 }
+
+                ctx.Ack(GetType().Name);
             });
         }
     }

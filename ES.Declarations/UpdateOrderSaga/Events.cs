@@ -5,7 +5,9 @@ namespace ES.Declarations.UpdateOrderSaga
 {
     public class Events
     {
-        [EventType($"V1.{nameof(Started)}")]
+        public const string AggregateName = "UpdateOrderSaga";
+
+        [EventType($"V1.{AggregateName}.{nameof(Started)}")]
         public record Started(
             string SagaId,
             List<OrderItemChangeInfo> Changes,
@@ -13,25 +15,25 @@ namespace ES.Declarations.UpdateOrderSaga
             string TenantId,
             string? CorrelationId = null) : IMessageContext;
 
-        [EventType($"V1.{nameof(OrderUpdateStatus)}")]
+        [EventType($"V1.{AggregateName}.{nameof(OrderUpdateStatus)}")]
         public record OrderUpdateStatus(bool Success, string TenantId, string? CorrelationId = null) : IMessageContext;
 
-        [EventType($"V1.{nameof(ReservationFailed)}")]
+        [EventType($"V1.{AggregateName}.{nameof(ReservationFailed)}")]
         public record ReservationFailed(string ProductId, string TenantId, string? CorrelationId = null)
             : IMessageContext;
 
-        [EventType($"V1.{nameof(ProductReservedOrReleased)}")]
+        [EventType($"V1.{AggregateName}.{nameof(ProductReservedOrReleased)}")]
         public record ProductReservedOrReleased(string ProductId, string TenantId, string? CorrelationId = null)
             : IMessageContext;
 
-        [EventType($"V1.{nameof(AllProductsReserved)}")]
+        [EventType($"V1.{AggregateName}.{nameof(AllProductsReserved)}")]
         public record AllProductsReserved(
             string OrderId,
             OrderItemChangeInfo[] Changes,
             string TenantId,
             string? CorrelationId = null) : IMessageContext;
 
-        [EventType($"V1.{nameof(ReservationsCancellingNeeded)}")]
+        [EventType($"V1.{AggregateName}.{nameof(ReservationsCancellingNeeded)}")]
         public record ReservationsCancellingNeeded(
             string OrderId,
             string[] ProductIdsToCancelReservation,
