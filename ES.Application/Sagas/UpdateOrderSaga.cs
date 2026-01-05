@@ -104,7 +104,7 @@ namespace ES.Application.Sagas
                 }
 
                 await _updateOrderSagaService.Handle(
-                    new Declarations.UpdateOrderSaga.Commands.MarkProductReservationFailed(
+                    new Declarations.UpdateOrderSaga.Commands.MarkProductReservationFailed1(
                         ctx.Message.ParseCorrelationId().SagaId,
                         ctx.Message.ProductId, ctx.Message.TenantId, ctx.Message.CorrelationId), ctx.CancellationToken);
             });
@@ -113,7 +113,7 @@ namespace ES.Application.Sagas
             {
                 var evt = ctx.Message;
                 var changes = evt.Changes
-                    .Select(x => new Declarations.OrderItemChange(
+                    .Select(x => new Declarations.Orders.OrderItemChange(
                         x.ProductId, x.AdjustQuantityBy))
                     .ToArray();
 

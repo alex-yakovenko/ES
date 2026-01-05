@@ -1,6 +1,5 @@
 ﻿using ES.Declarations.Inventory;
 using Eventuous;
-using System.Linq;
 
 namespace ES.Application.Inventory
 {
@@ -26,6 +25,20 @@ namespace ES.Application.Inventory
                 .GetStream(cmd => new StreamName($"Products-{cmd.ProductId}"))
                 .Act((state, events, cmd) =>
                 {
+                    if (events.OfType<Events.ProductReserved>()
+                        .Any(x => x.OrderId == cmd.OrderId && x.CorrelationId == cmd.CorrelationId))
+                    {
+                        // Idempotency check - release for this order already exists
+                        return [];
+                    }
+
+                    if (events.OfType<Events.ProductReservationFailed>()
+                        .Any(x => x.OrderId == cmd.OrderId && x.CorrelationId == cmd.CorrelationId))
+                    {
+                        // Idempotency check - release for this order already exists
+                        return [];
+                    }
+
                     if (state.AvailableQuantity - cmd.Quantity < 0)
                     {
                         return
@@ -54,6 +67,20 @@ namespace ES.Application.Inventory
                 .GetStream(cmd => new StreamName($"Products-{cmd.ProductId}"))
                 .Act((state, events, cmd) =>
                 {
+                    if (events.OfType<Events.ProductReleased>()
+                        .Any(x => x.OrderId == cmd.OrderId && x.CorrelationId == cmd.CorrelationId))
+                    {
+                        // Idempotency check - release for this order already exists
+                        return [];
+                    }
+
+                    if (events.OfType<Events.ProductReservationFailed>()
+                        .Any(x => x.OrderId == cmd.OrderId && x.CorrelationId == cmd.CorrelationId))
+                    {
+                        // Idempotency check - release for this order already exists
+                        return [];
+                    }
+
                     var reservedForOrder = state
                         .Reservations
                         .Where(x => x.OrderId == cmd.OrderId)
@@ -86,12 +113,14 @@ namespace ES.Application.Inventory
             On<Commands.CancelProductReservation>()
                 .InState(ExpectedState.Existing)
                 .GetStream(cmd => new StreamName($"Products-{cmd.ProductId}"))
-                .Act((state, events, cmd) =>
-                [
-                    new Events.ProductReservationCanceled(
-                        cmd.OrderId, cmd.TenantId, cmd.CorrelationId
-                    )
-                ]);
+                .Act((state, events, cmd) => events.OfType<Events.ProductReservationCanceled>()
+                    .Any(x => x.OrderId == cmd.OrderId && x.CorrelationId == cmd.CorrelationId)
+                    ? []
+                    : [
+                        new Events.ProductReservationCanceled(
+                            cmd.OrderId, cmd.TenantId, cmd.CorrelationId
+                        )
+                    ]);
         }
     }
 }

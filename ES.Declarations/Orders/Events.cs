@@ -1,5 +1,4 @@
 ﻿using ES.Core;
-using ES.Declarations;
 using Eventuous;
 
 namespace ES.Declarations.Orders

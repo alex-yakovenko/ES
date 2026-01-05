@@ -21,24 +21,42 @@ namespace ES.Application.Orders
             On<Commands.SetOrderPlaced>()
                 .InState(ExpectedState.Existing)
                 .GetStream(cmd => new StreamName($"OrderAggregate-{cmd.OrderId}"))
-                .Act((state, events, cmd) =>
-                [
-                    new Events.OrderPlaced(cmd.TenantId, cmd.CorrelationId)
-                ]);
+                .Act((state, events, cmd) => events.OfType<Events.OrderPlaced>()
+                    .Any(x => x.CorrelationId == cmd.CorrelationId) 
+                        ?[]
+                        :[
+                            new Events.OrderPlaced(cmd.TenantId, cmd.CorrelationId)
+                        ]);
 
             On<Commands.CancelOrder>()
                 .InState(ExpectedState.Existing)
                 .GetStream(cmd => new StreamName($"OrderAggregate-{cmd.OrderId}"))
-                .Act((state, events, cmd) =>
-                [
-                    new Events.OrderCanceled(cmd.Reason, cmd.TenantId, cmd.CorrelationId)
-                ]);
+                .Act((state, events, cmd) => events.OfType<Events.OrderCanceled>()
+                    .Any(x => x.CorrelationId == cmd.CorrelationId)
+                        ?[]
+                        :[
+                            new Events.OrderCanceled(cmd.Reason, cmd.TenantId, cmd.CorrelationId)
+                        ]);
 
             On<Commands.AdjustProducts>()
                 .InState(ExpectedState.Existing)
                 .GetStream(cmd => new StreamName($"OrderAggregate-{cmd.OrderId}"))
                 .Act((state, events, cmd) =>
                 {
+                    if (events.OfType<Events.ItemsAdjusted>()
+                        .Any(x => x.CorrelationId == cmd.CorrelationId))
+                    {
+                        // Idempotency check - adjustment for this correlation ID already exists
+                        return [];
+                    }
+
+                    if (events.OfType<Events.ItemsAdjustingFialeded>()
+    .Any(x => x.CorrelationId == cmd.CorrelationId))
+                    {
+                        // Idempotency check - adjustment for this correlation ID already exists
+                        return [];
+                    }
+
                     var items = state.Items.Select(x => x with { }).ToList();
 
                     foreach (var change in cmd.Changes)

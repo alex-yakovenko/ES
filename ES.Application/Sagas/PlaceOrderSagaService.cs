@@ -25,6 +25,13 @@ namespace ES.Application.Sagas
                 .GetStream(cmd => new StreamName($"PlaceOrderSaga-{cmd.SagaId}"))
                 .Act((state, events, cmd) =>
                 {
+                    if (events.OfType<Events.ProductReserved>()
+                        .Any(x => x.ProductId == cmd.ProductId && x.CorrelationId == cmd.CorrelationId))
+                    {
+                        // Idempotency check - reservation for this product already exists
+                        return [];
+                    }
+
                     var eventsToReturn = new List<object>
                         { new Events.ProductReserved(cmd.ProductId, cmd.TenantId, cmd.CorrelationId) };
 
@@ -34,7 +41,8 @@ namespace ES.Application.Sagas
                             : (x.ProductReserved && !x.ReservationFailed)
                     );
 
-                    if (allSatisfied && !state.OrderCanBePlaced)
+                    if (allSatisfied && !state.OrderCanBePlaced && !events.OfType<Events.OrderCanBePlaced>()
+                        .Any(x => x.CorrelationId == cmd.CorrelationId))
                     {
                         eventsToReturn.Add(new Events.OrderCanBePlaced(state.OrderId, cmd.TenantId, cmd.CorrelationId));
                     }
@@ -47,6 +55,13 @@ namespace ES.Application.Sagas
                 .GetStream(cmd => new StreamName($"PlaceOrderSaga-{cmd.SagaId}"))
                 .Act((state, events, cmd) =>
                 {
+                    if (events.OfType<Events.ProductReservationFailed>()
+                        .Any(x => x.ProductId == cmd.ProductId && x.CorrelationId == cmd.CorrelationId))
+                    {
+                        // Idempotency check - reservation failure for this product already exists
+                        return [];
+                    }
+
                     var eventsToReturn = new List<object>
                         { new Events.ProductReservationFailed(cmd.ProductId, cmd.TenantId, cmd.CorrelationId) };
 
@@ -57,9 +72,13 @@ namespace ES.Application.Sagas
                             .Select(x => x.ProductId)
                             .ToList();
 
-                        eventsToReturn.Add(
-                            new Events.OrderNeedsToBeCancelled(state.OrderId, reservationsToCancel, cmd.TenantId,
-                                cmd.CorrelationId));
+                        if (!events.OfType<Events.OrderNeedsToBeCancelled>()
+                            .Any(x => x.CorrelationId == cmd.CorrelationId))
+                        {
+                            eventsToReturn.Add(
+                                new Events.OrderNeedsToBeCancelled(state.OrderId, reservationsToCancel, cmd.TenantId,
+                                    cmd.CorrelationId));
+                        }
                     }
 
                     return eventsToReturn;

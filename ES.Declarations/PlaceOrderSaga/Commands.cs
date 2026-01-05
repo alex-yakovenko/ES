@@ -1,5 +1,5 @@
 ﻿using ES.Core;
-using ES.Declarations;
+using ES.Declarations.Orders;
 
 namespace ES.Declarations.PlaceOrderSaga
 {

@@ -77,7 +77,7 @@ namespace ES.Test.Scenarios
         [When("updating order {string} product changes as follows:")]
         public async Task WhenUpdatingOrderProductChangesAsFollows(string orderId, DataTable dataTable)
         {
-            var command = new Declarations.UpdateOrderSaga.Commands.Start($"update-order-{orderId}",
+            var command = new Declarations.UpdateOrderSaga.Commands.StartUpdate($"update-order-{orderId}",
                 orderId, [], Tenant);
 
             foreach (var row in dataTable.Rows)

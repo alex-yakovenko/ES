@@ -44,7 +44,7 @@ namespace ES.Declarations.UpdateOrderSaga
     }
 }
 
-    public record OrderItemChange(string ProductId, int AdjustQuantityBy);
+    public record OrderItemChangeInfo(string ProductId, int AdjustQuantityBy);
 
     public record OrderChangeWithFlafs(string ProductId, int AdjustQuantityBy)
     {

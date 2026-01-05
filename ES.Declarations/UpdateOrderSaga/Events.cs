@@ -8,7 +8,7 @@ namespace ES.Declarations.UpdateOrderSaga
         [EventType($"V1.{nameof(Started)}")]
         public record Started(
             string SagaId,
-            List<OrderItemChange> Changes,
+            List<OrderItemChangeInfo> Changes,
             string OrderId,
             string TenantId,
             string? CorrelationId = null) : IMessageContext;
@@ -27,7 +27,7 @@ namespace ES.Declarations.UpdateOrderSaga
         [EventType($"V1.{nameof(AllProductsReserved)}")]
         public record AllProductsReserved(
             string OrderId,
-            OrderItemChange[] Changes,
+            OrderItemChangeInfo[] Changes,
             string TenantId,
             string? CorrelationId = null) : IMessageContext;
 

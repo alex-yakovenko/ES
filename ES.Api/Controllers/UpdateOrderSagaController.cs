@@ -14,7 +14,7 @@ public class UpdateOrderSagaController(ICommandService<UpdateOrderSagaState> ser
     [ProducesDomainError]
     [ProducesNotFound]
     public async Task<IActionResult?> Start(
-        [FromBody] Commands.Start cmd,
+        [FromBody] Commands.StartUpdate cmd,
         CancellationToken cancellationToken
     )
     {
@@ -42,7 +42,7 @@ public class UpdateOrderSagaController(ICommandService<UpdateOrderSagaState> ser
     [ProducesDomainError]
     [ProducesNotFound]
     public async Task<IActionResult?> MarkProductReservationFailed(
-        [FromBody] Commands.MarkProductReservationFailed cmd,
+        [FromBody] Commands.MarkProductReservationFailed1 cmd,
         CancellationToken cancellationToken
     )
     {

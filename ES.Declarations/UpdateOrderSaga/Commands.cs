@@ -10,7 +10,7 @@ namespace ES.Declarations.UpdateOrderSaga
             string TenantId,
             string? CorrelationId = null) : IMessageContext;
 
-        public record MarkProductReservationFailed(
+        public record MarkProductReservationFailed1(
             string SagaId,
             string ProductId,
             string TenantId,
@@ -22,10 +22,10 @@ namespace ES.Declarations.UpdateOrderSaga
             string TenantId,
             string? CorrelationId = null) : IMessageContext;
 
-        public record Start(
+        public record StartUpdate(
             string SagaId,
             string OrderId,
-            List<OrderItemChange> Changes,
+            List<OrderItemChangeInfo> Changes,
             string TenantId,
             string? CorrelationId = null) : IMessageContext;
     }
