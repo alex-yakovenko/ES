@@ -3,7 +3,7 @@ using ES.Declarations;
 using Eventuous;
 using System.Linq;
 
-namespace ES.Test.Aggregates
+namespace ES.Application.Orders
 {
     public class OrderService : CommandService<OrderState>
     {

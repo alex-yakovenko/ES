@@ -2,7 +2,7 @@
 using Eventuous;
 using System.Linq;
 
-namespace ES.Test.Aggregates
+namespace ES.Application.Inventory
 {
     public class InventoryService : CommandService<InventoryState>
     {

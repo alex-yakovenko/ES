@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\ES.Core\ES.Core.csproj" />
+    <ProjectReference Include="..\ES.Declarations\ES.Declarations.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Eventuous" Version="0.15.1" />
+    <PackageReference Include="Eventuous.Application" Version="0.15.1" />
+    <PackageReference Include="Eventuous.Subscriptions" Version="0.15.1" />
+
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

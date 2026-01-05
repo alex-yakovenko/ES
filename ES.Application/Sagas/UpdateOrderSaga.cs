@@ -3,7 +3,7 @@ using ES.Declarations.UpdateOrderSaga;
 using Eventuous;
 using Eventuous.Subscriptions.Context;
 
-namespace ES.Test.Sagas
+namespace ES.Application.Sagas
 {
     public class UpdateOrderSaga : Eventuous.Subscriptions.EventHandler
     {

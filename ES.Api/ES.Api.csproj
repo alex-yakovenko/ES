@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Eventuous" Version="0.15.1" />
+    <PackageReference Include="Eventuous.Application" Version="0.15.1" />
+    <PackageReference Include="Eventuous.Extensions.AspNetCore" Version="0.15.1" />
+    <PackageReference Include="Eventuous.EventStore" Version="0.15.1" />
+    <PackageReference Include="Eventuous.Extensions.DependencyInjection" Version="0.15.1" />
+    <PackageReference Include="Eventuous.Projections.MongoDB" Version="0.15.1" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.0.0" />
+	  <!--<PackageReference Include="MongoDB.Driver.Core.Extensions.DiagnosticSources" Version="3.0.0" />
+	  <PackageReference Include="MongoDB.Driver" Version="3.0.0" />-->
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ES.Application\ES.Application.csproj" />
+  </ItemGroup>
+
+</Project>

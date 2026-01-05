@@ -1,5 +1,7 @@
 <Solution>
   <Project Path="ES.Core/ES.Core.csproj" />
   <Project Path="ES.Declarations/ES.Declarations.csproj" />
+  <Project Path="ES.Application/ES.Application.csproj" />
+  <Project Path="ES.Api/ES.Api.csproj" />
   <Project Path="ES.Test/ES.Test.csproj" />
 </Solution>
