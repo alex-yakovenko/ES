@@ -29,11 +29,9 @@ namespace ES.Application.Sagas
                 await _orderService.Handle(
                     new Declarations.Orders.Commands.DraftOrder(msg.OrderId,
                         msg.CustomerId, msg.Date, msg.Items,
-                        new MessageContext
-                        {
-                            TenantId = msg.TenantId,
-                            CorrelationId = $"PlaceOrderSaga:{msg.SagaId}"
-                        }), ctx.CancellationToken);
+                        msg.TenantId,
+                        $"PlaceOrderSaga:{msg.SagaId}"
+                    ), ctx.CancellationToken);
 
                 foreach (var item in ctx.Message.Items)
                 {
@@ -42,7 +40,9 @@ namespace ES.Application.Sagas
                             item.ProductId,
                             item.Quantity,
                             ctx.Message.OrderId,
-                            ctx.Message), ctx.CancellationToken);
+                            ctx.Message.TenantId,
+                            ctx.Message.CorrelationId
+                        ), ctx.CancellationToken);
                 }
             });
 
@@ -56,7 +56,10 @@ namespace ES.Application.Sagas
                 await _placeOrderSagaService.Handle(
                     new Commands.MarkProductReserved(
                         ctx.Message.ParseCorrelationId().SagaId,
-                        ctx.Message.ProductId, ctx.Message), ctx.CancellationToken);
+                        ctx.Message.ProductId,
+                        ctx.Message.TenantId,
+                        ctx.Message.CorrelationId
+                    ), ctx.CancellationToken);
             });
 
             On<Declarations.Inventory.Events.ProductReservationFailed>(async ctx =>
@@ -69,27 +72,39 @@ namespace ES.Application.Sagas
                 await _placeOrderSagaService.Handle(
                     new Commands.MarkProductReservationFailed(
                         ctx.Message.ParseCorrelationId().SagaId,
-                        ctx.Message.ProductId, ctx.Message), ctx.CancellationToken);
+                        ctx.Message.ProductId,
+                        ctx.Message.TenantId,
+                        ctx.Message.CorrelationId
+                    ), ctx.CancellationToken);
             });
 
             On<Declarations.PlaceOrderSaga.Events.OrderCanBePlaced>(async ctx =>
             {
                 await _orderService.Handle(
                     new Declarations.Orders.Commands.SetOrderPlaced(
-                        ctx.Message.OrderId, ctx.Message), ctx.CancellationToken);
+                        ctx.Message.OrderId,
+                        ctx.Message.TenantId,
+                        ctx.Message.CorrelationId
+                    ), ctx.CancellationToken);
             });
 
             On<Declarations.PlaceOrderSaga.Events.OrderNeedsToBeCancelled>(async ctx =>
             {
                 await _orderService.Handle(
                     new Declarations.Orders.Commands.CancelOrder(
-                        ctx.Message.OrderId, "Failed to reserve products.", ctx.Message), ctx.CancellationToken);
+                        ctx.Message.OrderId, "Failed to reserve products.",
+                        ctx.Message.TenantId,
+                        ctx.Message.CorrelationId
+                    ), ctx.CancellationToken);
 
                 foreach (var productId in ctx.Message.ProductIds)
                 {
                     await _inventoryService.Handle(
                         new Declarations.Inventory.Commands.CancelProductReservation(
-                            productId, ctx.Message.OrderId, ctx.Message.Context), ctx.CancellationToken);
+                            productId, ctx.Message.OrderId,
+                            ctx.Message.TenantId,
+                            ctx.Message.CorrelationId
+                        ), ctx.CancellationToken);
                 }
             });
         }

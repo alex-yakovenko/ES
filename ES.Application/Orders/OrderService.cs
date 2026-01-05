@@ -14,7 +14,8 @@ namespace ES.Application.Orders
                 .GetStream(cmd => new StreamName($"OrderAggregate-{cmd.OrderId}"))
                 .Act((state, events, cmd) =>
                 [
-                    new Events.OrderDrafted(cmd.OrderId, cmd.CustomerId, cmd.Date, cmd.Items, cmd)
+                    new Events.OrderDrafted(cmd.OrderId, cmd.CustomerId, cmd.Date, cmd.Items, cmd.TenantId,
+                        cmd.CorrelationId)
                 ]);
 
             On<Commands.SetOrderPlaced>()
@@ -22,7 +23,7 @@ namespace ES.Application.Orders
                 .GetStream(cmd => new StreamName($"OrderAggregate-{cmd.OrderId}"))
                 .Act((state, events, cmd) =>
                 [
-                    new Events.OrderPlaced(cmd)
+                    new Events.OrderPlaced(cmd.TenantId, cmd.CorrelationId)
                 ]);
 
             On<Commands.CancelOrder>()
@@ -30,7 +31,7 @@ namespace ES.Application.Orders
                 .GetStream(cmd => new StreamName($"OrderAggregate-{cmd.OrderId}"))
                 .Act((state, events, cmd) =>
                 [
-                    new Events.OrderCanceled(cmd.Reason, cmd)
+                    new Events.OrderCanceled(cmd.Reason, cmd.TenantId, cmd.CorrelationId)
                 ]);
 
             On<Commands.AdjustProducts>()
@@ -61,14 +62,14 @@ namespace ES.Application.Orders
 
                     if (items.Any(x => x.Quantity < 0))
                     {
-                        return [new Events.ItemsAdjustingFialeded(cmd)];
+                        return [new Events.ItemsAdjustingFialeded(cmd.TenantId, cmd.CorrelationId)];
                     }
                     else
                     {
                         return
                         [
                             new Events.ItemsAdjusted(
-                                cmd.Changes, cmd
+                                cmd.Changes, cmd.TenantId, cmd.CorrelationId
                             )
                         ];
                     }

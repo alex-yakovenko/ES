@@ -10,17 +10,20 @@ namespace ES.Declarations.PlaceOrderSaga
             string OrderId,
             string CustomerId,
             DateOnly Date,
-            List<OrderItem> Items, 
-            IMessageContext Context) : MessageContext(Context);
+            List<OrderItem> Items,
+            string TenantId,
+            string? CorrelationId = null) : IMessageContext;
 
         public record MarkProductReserved(
-            string SagaId, 
-            string ProductId, 
-            IMessageContext Context) : MessageContext(Context);        
-        
+            string SagaId,
+            string ProductId,
+            string TenantId,
+            string? CorrelationId = null) : IMessageContext;
+
         public record MarkProductReservationFailed(
-            string SagaId, 
-            string ProductId, 
-            IMessageContext Context) : MessageContext(Context);
+            string SagaId,
+            string ProductId,
+            string TenantId,
+            string? CorrelationId = null) : IMessageContext;
     }
 }

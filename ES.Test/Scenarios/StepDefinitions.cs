@@ -48,10 +48,8 @@ namespace ES.Test.Scenarios
         public async Task GivenProductWithSKUAndAvailableQuantityIsPresentInInventory(string sku, int quantity)
         {
             await inventoryService.Handle(new Declarations.Inventory.Commands.CreateInventoryItem(sku, sku, quantity,
-                new MessageContext
-                {
-                    TenantId = Tenant
-                }), CancellationToken.None);
+                Tenant
+            ), CancellationToken.None);
 
             await runHandlers();
         }
@@ -62,7 +60,7 @@ namespace ES.Test.Scenarios
             DataTable dataTable)
         {
             var command = new Declarations.PlaceOrderSaga.Commands.Start($"place-order-{orderId}", orderId,
-                customer, DateOnly.Parse(date), [], new MessageContext(Tenant));
+                customer, DateOnly.Parse(date), [], Tenant);
 
             foreach (var row in dataTable.Rows)
                 command.Items.Add(new()
@@ -80,7 +78,7 @@ namespace ES.Test.Scenarios
         public async Task WhenUpdatingOrderProductChangesAsFollows(string orderId, DataTable dataTable)
         {
             var command = new Declarations.UpdateOrderSaga.Commands.Start($"update-order-{orderId}",
-                orderId, [], new MessageContext(Tenant));
+                orderId, [], Tenant);
 
             foreach (var row in dataTable.Rows)
                 command.Changes.Add(new(row[0], int.Parse(row[1])));

@@ -16,7 +16,7 @@ namespace ES.Application.Sagas
                 .Act((state, events, cmd) =>
                 [
                     new Events.Started(cmd.SagaId, cmd.Changes, cmd.OrderId,
-                        new MessageContext(cmd.TenantId, $"UpdateOrderSaga:{cmd.SagaId}"))
+                        cmd.TenantId, $"UpdateOrderSaga:{cmd.SagaId}")
                 ]);
 
             On<Commands.UpdateStatus>()
@@ -24,7 +24,7 @@ namespace ES.Application.Sagas
                 .GetStream(cmd => new StreamName($"UpdateOrderSaga-{cmd.SagaId}"))
                 .Act((state, events, cmd) =>
                 [
-                    new Events.OrderUpdateStatus(cmd.Success, cmd)
+                    new Events.OrderUpdateStatus(cmd.Success, cmd.TenantId, cmd.CorrelationId)
                 ]);
 
             On<Commands.MarkProductReservedOrReleased>()
@@ -32,7 +32,8 @@ namespace ES.Application.Sagas
                 .GetStream(cmd => new StreamName($"UpdateOrderSaga-{cmd.SagaId}"))
                 .Act((state, events, cmd) =>
                 {
-                    var eventsToReturn = new List<object> { new Events.ProductReservedOrReleased(cmd.ProductId, cmd) };
+                    var eventsToReturn = new List<object>
+                        { new Events.ProductReservedOrReleased(cmd.ProductId, cmd.TenantId, cmd.CorrelationId) };
 
                     var allReserved = state.Changes.All(x =>
                         x.ProductId == cmd.ProductId ? true : x.ReservedSuccessfuly
@@ -44,7 +45,8 @@ namespace ES.Application.Sagas
                             .Select(x => new OrderItemChange(x.ProductId, x.AdjustQuantityBy))
                             .ToArray();
 
-                        eventsToReturn.Add(new Events.AllProductsReserved(state.OrderId, changes, cmd));
+                        eventsToReturn.Add(new Events.AllProductsReserved(state.OrderId, changes, cmd.TenantId,
+                            cmd.CorrelationId));
                     }
 
                     return eventsToReturn;
@@ -55,7 +57,8 @@ namespace ES.Application.Sagas
                 .GetStream(cmd => new StreamName($"UpdateOrderSaga-{cmd.SagaId}"))
                 .Act((state, events, cmd) =>
                 {
-                    var eventsToReturn = new List<object> { new Events.ReservationFailed(cmd.ProductId, cmd) };
+                    var eventsToReturn = new List<object>
+                        { new Events.ReservationFailed(cmd.ProductId, cmd.TenantId, cmd.CorrelationId) };
 
                     var productIdsToCancelReservations = state.Changes
                         .Where(s => s.ReservedSuccessfuly)
@@ -63,7 +66,7 @@ namespace ES.Application.Sagas
                         .ToArray();
 
                     eventsToReturn.Add(new Events.ReservationsCancellingNeeded(state.OrderId,
-                        productIdsToCancelReservations, cmd));
+                        productIdsToCancelReservations, cmd.TenantId, cmd.CorrelationId));
 
                     return eventsToReturn;
                 });

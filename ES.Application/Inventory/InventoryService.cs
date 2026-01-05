@@ -16,7 +16,8 @@ namespace ES.Application.Inventory
                     new Events.InventoryItemCreated(
                         cmd.ProductId,
                         cmd.InitialQuantity,
-                        cmd
+                        cmd.TenantId,
+                        cmd.CorrelationId
                     )
                 ]);
 
@@ -32,7 +33,7 @@ namespace ES.Application.Inventory
                             new Events.ProductReservationFailed(
                                 cmd.ProductId,
                                 cmd.Quantity,
-                                cmd.OrderId, cmd)
+                                cmd.OrderId, cmd.TenantId, cmd.CorrelationId)
                         ];
                     }
                     else
@@ -42,7 +43,7 @@ namespace ES.Application.Inventory
                             new Events.ProductReserved(
                                 cmd.ProductId,
                                 cmd.Quantity,
-                                cmd.OrderId, cmd
+                                cmd.OrderId, cmd.TenantId, cmd.CorrelationId
                             )
                         ];
                     }
@@ -65,7 +66,7 @@ namespace ES.Application.Inventory
                             new Events.ProductReservationFailed(
                                 cmd.ProductId,
                                 cmd.IncreaseQuantityBy,
-                                cmd.OrderId, cmd
+                                cmd.OrderId, cmd.TenantId, cmd.CorrelationId
                             )
                         ];
                     }
@@ -76,7 +77,7 @@ namespace ES.Application.Inventory
                             new Events.ProductReleased(
                                 cmd.ProductId,
                                 cmd.IncreaseQuantityBy,
-                                cmd.OrderId, cmd
+                                cmd.OrderId, cmd.TenantId, cmd.CorrelationId
                             )
                         ];
                     }
@@ -88,7 +89,7 @@ namespace ES.Application.Inventory
                 .Act((state, events, cmd) =>
                 [
                     new Events.ProductReservationCanceled(
-                        cmd.OrderId, cmd
+                        cmd.OrderId, cmd.TenantId, cmd.CorrelationId
                     )
                 ]);
         }

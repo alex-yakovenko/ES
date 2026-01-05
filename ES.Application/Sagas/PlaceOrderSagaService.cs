@@ -17,8 +17,7 @@ namespace ES.Application.Sagas
                 [
                     new Events.Started(cmd.SagaId, cmd.OrderId, cmd.CustomerId,
                         cmd.Date, cmd.Items,
-                        new MessageContext
-                            { TenantId = cmd.TenantId, CorrelationId = $"PlaceOrderSaga:{cmd.SagaId}" })
+                        cmd.TenantId, $"PlaceOrderSaga:{cmd.SagaId}")
                 ]);
 
             On<Commands.MarkProductReserved>()
@@ -26,7 +25,8 @@ namespace ES.Application.Sagas
                 .GetStream(cmd => new StreamName($"PlaceOrderSaga-{cmd.SagaId}"))
                 .Act((state, events, cmd) =>
                 {
-                    var eventsToReturn = new List<object> { new Events.ProductReserved(cmd.ProductId, cmd) };
+                    var eventsToReturn = new List<object>
+                        { new Events.ProductReserved(cmd.ProductId, cmd.TenantId, cmd.CorrelationId) };
 
                     var allSatisfied = state.ItemsToReserve.All(x =>
                         x.ProductId == cmd.ProductId
@@ -36,7 +36,7 @@ namespace ES.Application.Sagas
 
                     if (allSatisfied && !state.OrderCanBePlaced)
                     {
-                        eventsToReturn.Add(new Events.OrderCanBePlaced(state.OrderId, cmd));
+                        eventsToReturn.Add(new Events.OrderCanBePlaced(state.OrderId, cmd.TenantId, cmd.CorrelationId));
                     }
 
                     return eventsToReturn;
@@ -47,7 +47,8 @@ namespace ES.Application.Sagas
                 .GetStream(cmd => new StreamName($"PlaceOrderSaga-{cmd.SagaId}"))
                 .Act((state, events, cmd) =>
                 {
-                    var eventsToReturn = new List<object> { new Events.ProductReservationFailed(cmd.ProductId, cmd) };
+                    var eventsToReturn = new List<object>
+                        { new Events.ProductReservationFailed(cmd.ProductId, cmd.TenantId, cmd.CorrelationId) };
 
                     if (!state.OrderNeedsToBeCancelled)
                     {
@@ -57,7 +58,8 @@ namespace ES.Application.Sagas
                             .ToList();
 
                         eventsToReturn.Add(
-                            new Events.OrderNeedsToBeCancelled(state.OrderId, reservationsToCancel, cmd));
+                            new Events.OrderNeedsToBeCancelled(state.OrderId, reservationsToCancel, cmd.TenantId,
+                                cmd.CorrelationId));
                     }
 
                     return eventsToReturn;

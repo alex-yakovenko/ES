@@ -34,22 +34,22 @@ public class UnitTest1(ITestOutputHelper outputHelper) : IntegrationTestBase
         var runHandlers = CreateHandlerRunner(services, readPositions, Tenant);
 
         await inventoryService.Handle(new Declarations.Inventory.Commands.CreateInventoryItem(
-            "BOOK-1", "Book #1", 300, new MessageContext { TenantId = Tenant }), CancellationToken.None);
+            "BOOK-1", "Book #1", 300, Tenant), CancellationToken.None);
 
         await runHandlers();
 
         await inventoryService.Handle(new Declarations.Inventory.Commands.ReserveProduct(
-            "BOOK-1", 20, "Order #1", new MessageContext { TenantId = Tenant }), CancellationToken.None);
+            "BOOK-1", 20, "Order #1", Tenant), CancellationToken.None);
 
         await runHandlers();
 
         await inventoryService.Handle(new Declarations.Inventory.Commands.ReserveProduct(
-            "BOOK-1", 15, "Order #2", new MessageContext { TenantId = Tenant }), CancellationToken.None);
+            "BOOK-1", 15, "Order #2", Tenant), CancellationToken.None);
 
         await placeOrderSagaService.Handle(new Declarations.PlaceOrderSaga.Commands.Start(
             "Saga-1", "A-2025-078", "John Doe", new DateOnly(2025, 12, 29),
             [new() { ProductId = "BOOK-1", Quantity = 35 }]
-            , new MessageContext { TenantId = Tenant }), CancellationToken.None);
+            , Tenant), CancellationToken.None);
 
         await runHandlers();
 

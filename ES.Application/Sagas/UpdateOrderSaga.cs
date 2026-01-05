@@ -27,12 +27,16 @@ namespace ES.Application.Sagas
                     if (product.AdjustQuantityBy > 0)
                     {
                         await _inventoryService.Handle(new Declarations.Inventory.Commands.ReserveProduct(
-                            product.ProductId, product.AdjustQuantityBy, evt.OrderId, evt), ctx.CancellationToken);
+                                product.ProductId, product.AdjustQuantityBy, evt.OrderId, evt.TenantId,
+                                evt.CorrelationId),
+                            ctx.CancellationToken);
                     }
                     else
                     {
                         await _inventoryService.Handle(new Declarations.Inventory.Commands.ReleaseProduct(
-                            product.ProductId, -product.AdjustQuantityBy, evt.OrderId, evt), ctx.CancellationToken);
+                                product.ProductId, -product.AdjustQuantityBy, evt.OrderId, evt.TenantId,
+                                evt.CorrelationId),
+                            ctx.CancellationToken);
                     }
             });
 
@@ -46,7 +50,7 @@ namespace ES.Application.Sagas
                 }
 
                 var cmd = new Declarations.UpdateOrderSaga.Commands.UpdateStatus(
-                    evt.ParseCorrelationId().SagaId, true, evt);
+                    evt.ParseCorrelationId().SagaId, true, evt.TenantId, evt.CorrelationId);
 
                 await _updateOrderSagaService.Handle(cmd, ctx.CancellationToken);
             });
@@ -61,7 +65,7 @@ namespace ES.Application.Sagas
                 }
 
                 var cmd = new Declarations.UpdateOrderSaga.Commands.UpdateStatus(
-                    evt.ParseCorrelationId().SagaId, false, evt);
+                    evt.ParseCorrelationId().SagaId, false, evt.TenantId, evt.CorrelationId);
 
                 await _updateOrderSagaService.Handle(cmd, ctx.CancellationToken);
             });
@@ -76,7 +80,7 @@ namespace ES.Application.Sagas
                 await _updateOrderSagaService.Handle(
                     new Commands.MarkProductReservedOrReleased(
                         ctx.Message.ParseCorrelationId().SagaId,
-                        ctx.Message.ProductId, ctx.Message), ctx.CancellationToken);
+                        ctx.Message.ProductId, ctx.Message.TenantId, ctx.Message.CorrelationId), ctx.CancellationToken);
             });
 
             On<Declarations.Inventory.Events.ProductReleased>(async ctx =>
@@ -89,7 +93,7 @@ namespace ES.Application.Sagas
                 await _updateOrderSagaService.Handle(
                     new Commands.MarkProductReservedOrReleased(
                         ctx.Message.ParseCorrelationId().SagaId,
-                        ctx.Message.ProductId, ctx.Message), ctx.CancellationToken);
+                        ctx.Message.ProductId, ctx.Message.TenantId, ctx.Message.CorrelationId), ctx.CancellationToken);
             });
 
             On<Declarations.Inventory.Events.ProductReservationFailed>(async ctx =>
@@ -102,7 +106,7 @@ namespace ES.Application.Sagas
                 await _updateOrderSagaService.Handle(
                     new Declarations.UpdateOrderSaga.Commands.MarkProductReservationFailed(
                         ctx.Message.ParseCorrelationId().SagaId,
-                        ctx.Message.ProductId, ctx.Message), ctx.CancellationToken);
+                        ctx.Message.ProductId, ctx.Message.TenantId, ctx.Message.CorrelationId), ctx.CancellationToken);
             });
 
             On<Events.AllProductsReserved>(async ctx =>
@@ -114,7 +118,7 @@ namespace ES.Application.Sagas
                     .ToArray();
 
                 await orderService.Handle(new Declarations.Orders.Commands.AdjustProducts(
-                    evt.OrderId, changes, evt), ctx.CancellationToken);
+                    evt.OrderId, changes, evt.TenantId, evt.CorrelationId), ctx.CancellationToken);
             });
 
             On<Events.ReservationsCancellingNeeded>(async ctx =>
@@ -123,7 +127,7 @@ namespace ES.Application.Sagas
                 foreach (var productId in evt.ProductIdsToCancelReservation)
                 {
                     await inventoryService.Handle(new Declarations.Inventory.Commands.CancelProductReservation(
-                        productId, evt.OrderId, evt), ctx.CancellationToken);
+                        productId, evt.OrderId, evt.TenantId, evt.CorrelationId), ctx.CancellationToken);
                 }
             });
         }
