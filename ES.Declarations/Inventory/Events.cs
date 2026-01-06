@@ -11,7 +11,7 @@ namespace ES.Declarations.Inventory
 
         [EventType($"V1.{AggregateName}.{nameof(InventoryItemCreated)}")]
         public record InventoryItemCreated(
-            string Code,
+            string ProductId,
             int InitialQuantity,
             string TenantId,
             string? CorrelationId = null
@@ -37,6 +37,7 @@ namespace ES.Declarations.Inventory
 
         [EventType($"V1.{AggregateName}.{nameof(ProductReservationCanceled)}")]
         public record ProductReservationCanceled(
+            string ProductId,
             string OrderId,
             string TenantId,
             string? CorrelationId = null

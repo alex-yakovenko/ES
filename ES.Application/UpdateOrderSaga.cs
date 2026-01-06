@@ -2,8 +2,9 @@
 using ES.Declarations.UpdateOrderSaga;
 using Eventuous;
 using Eventuous.Subscriptions.Context;
+using Microsoft.EntityFrameworkCore;
 
-namespace ES.Application.Sagas
+namespace ES.Application
 {
     public class UpdateOrderSaga : Eventuous.Subscriptions.EventHandler
     {

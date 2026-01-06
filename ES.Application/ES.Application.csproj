@@ -9,6 +9,13 @@
     <PackageReference Include="Eventuous" Version="0.15.1" />
     <PackageReference Include="Eventuous.Application" Version="0.15.1" />
     <PackageReference Include="Eventuous.Subscriptions" Version="0.15.1" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	  <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0" />
+	  <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
+	  <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.0" />
 
   </ItemGroup>
 

@@ -3,7 +3,7 @@ using ES.Declarations;
 using Eventuous;
 using System.Linq;
 
-namespace ES.Application.Orders
+namespace ES.Application
 {
     public class OrderService : CommandService<OrderState>
     {
@@ -25,7 +25,7 @@ namespace ES.Application.Orders
                     .Any(x => x.CorrelationId == cmd.CorrelationId) 
                         ?[]
                         :[
-                            new Events.OrderPlaced(cmd.TenantId, cmd.CorrelationId)
+                            new Events.OrderPlaced(cmd.OrderId, cmd.TenantId, cmd.CorrelationId)
                         ]);
 
             On<Commands.CancelOrder>()
@@ -35,7 +35,7 @@ namespace ES.Application.Orders
                     .Any(x => x.CorrelationId == cmd.CorrelationId)
                         ?[]
                         :[
-                            new Events.OrderCanceled(cmd.Reason, cmd.TenantId, cmd.CorrelationId)
+                            new Events.OrderCanceled(cmd.OrderId, cmd.Reason, cmd.TenantId, cmd.CorrelationId)
                         ]);
 
             On<Commands.AdjustProducts>()
@@ -80,13 +80,13 @@ namespace ES.Application.Orders
 
                     if (items.Any(x => x.Quantity < 0))
                     {
-                        return [new Events.ItemsAdjustingFialeded(cmd.TenantId, cmd.CorrelationId)];
+                        return [new Events.ItemsAdjustingFialeded(cmd.OrderId, cmd.TenantId, cmd.CorrelationId)];
                     }
                     else
                     {
                         return
                         [
-                            new Events.ItemsAdjusted(
+                            new Events.ItemsAdjusted(cmd.OrderId,
                                 cmd.Changes, cmd.TenantId, cmd.CorrelationId
                             )
                         ];

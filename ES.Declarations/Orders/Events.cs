@@ -18,6 +18,7 @@ namespace ES.Declarations.Orders
 
         [EventType($"V1.{AggregateName}.{nameof(OrderCanceled)}")]
         public record OrderCanceled(
+            string OrderId,
             string Reason,
             string TenantId,
             string? CorrelationId = null
@@ -25,12 +26,14 @@ namespace ES.Declarations.Orders
 
         [EventType($"V1.{AggregateName}.{nameof(OrderPlaced)}")]
         public record OrderPlaced(
+            string OrderId,
             string TenantId,
             string? CorrelationId = null
         ) : IMessageContext;
 
         [EventType($"V1.{AggregateName}.{nameof(ItemsAdjusted)}")]
         public record ItemsAdjusted(
+            string OrderId,
             OrderItemChange[] Changes,
             string TenantId,
             string? CorrelationId = null
@@ -38,6 +41,7 @@ namespace ES.Declarations.Orders
 
         [EventType($"V1.{AggregateName}.{nameof(ItemsAdjustingFialeded)}")]
         public record ItemsAdjustingFialeded(
+            string OrderId,
             string TenantId,
             string? CorrelationId = null
         ) : IMessageContext;

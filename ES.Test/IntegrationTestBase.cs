@@ -4,9 +4,6 @@ using ES.Declarations.Inventory;
 using ES.Declarations.Orders;
 using ES.Declarations.PlaceOrderSaga;
 using ES.Declarations.UpdateOrderSaga;
-using ES.Application.Inventory;
-using ES.Application.Orders;
-using ES.Application.Sagas;
 using ES.Test.EventStorage;
 using Eventuous;
 using Eventuous.Subscriptions;
@@ -18,6 +15,7 @@ using Xunit.Abstractions;
 using Microsoft.Extensions.Hosting;
 using System.Diagnostics;
 using Eventuous.Subscriptions.Logging;
+using ES.Application;
 
 namespace ES.Test;
 

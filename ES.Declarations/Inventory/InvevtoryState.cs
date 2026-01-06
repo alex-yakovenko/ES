@@ -17,7 +17,7 @@ namespace ES.Declarations.Inventory
                  state with
                  {
 
-                     ProductId = evt.Code,
+                     ProductId = evt.ProductId,
                      AvailableQuantity = evt.InitialQuantity,
                      TenantId = evt.TenantId
                  });

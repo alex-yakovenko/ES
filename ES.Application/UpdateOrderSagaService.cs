@@ -4,7 +4,7 @@ using Eventuous;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace ES.Application.Sagas
+namespace ES.Application
 {
     public class UpdateOrderSagaService : CommandService<UpdateOrderSagaState>
     {

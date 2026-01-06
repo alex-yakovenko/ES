@@ -6,7 +6,7 @@ using Eventuous;
 using Eventuous.Subscriptions.Context;
 using Commands = ES.Declarations.PlaceOrderSaga.Commands;
 
-namespace ES.Application.Sagas
+namespace ES.Application
 {
     public class PlaceOrderSaga : Eventuous.Subscriptions.EventHandler
     {

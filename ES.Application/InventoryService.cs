@@ -1,7 +1,7 @@
 ﻿using ES.Declarations.Inventory;
 using Eventuous;
 
-namespace ES.Application.Inventory
+namespace ES.Application
 {
     public class InventoryService : CommandService<InventoryState>
     {
@@ -117,7 +117,7 @@ namespace ES.Application.Inventory
                     .Any(x => x.OrderId == cmd.OrderId && x.CorrelationId == cmd.CorrelationId)
                     ? []
                     : [
-                        new Events.ProductReservationCanceled(
+                        new Events.ProductReservationCanceled(cmd.ProductId,
                             cmd.OrderId, cmd.TenantId, cmd.CorrelationId
                         )
                     ]);
